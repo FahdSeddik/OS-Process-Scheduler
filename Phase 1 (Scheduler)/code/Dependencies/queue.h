@@ -1,21 +1,22 @@
 #ifndef Q_QUEUE_H
 #define Q_QUEUE_H
 
-
 /**
  * Structure representing a node in the queue.
  */
-typedef struct q_QueueNode {
-    int processId;           // Process ID stored in the queue
-    struct q_QueueNode *next;  // Pointer to the next node in the queue
+typedef struct q_QueueNode
+{
+    int processId;            // Process ID stored in the queue
+    struct q_QueueNode *next; // Pointer to the next node in the queue
 } q_QueueNode;
 
 /**
  * Structure representing the queue, with pointers to the front and rear nodes.
  */
-typedef struct q_Queue {
-    q_QueueNode *front;  // Pointer to the front node of the queue
-    q_QueueNode *rear;   // Pointer to the rear node of the queue
+typedef struct q_Queue
+{
+    q_QueueNode *front; // Pointer to the front node of the queue
+    q_QueueNode *rear;  // Pointer to the rear node of the queue
 } q_Queue;
 
 // Function prototypes
@@ -24,7 +25,7 @@ typedef struct q_Queue {
  * Allocates and initializes a new empty queue.
  * @return A pointer to the initialized queue or NULL if memory allocation fails.
  */
-q_Queue* q_createQueue();
+q_Queue *q_createQueue();
 
 /**
  * Adds a new node with the given process ID to the end of the queue.
@@ -52,5 +53,10 @@ int q_getFront(const q_Queue *queue);
  * @param queue Pointer to the queue to be freed.
  */
 void q_freeQueue(q_Queue *queue);
+
+/**
+ * Checks if the queue is empty.
+ */
+bool q_isEmpty(const q_Queue *queue);
 
 #endif // QUEUE_H
