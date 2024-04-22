@@ -1,20 +1,32 @@
 #include "headers.h"
 
-/* Modify this file as needed*/
 int remainingtime;
 
-int main(int agrc, char * argv[])
+int main(int argc, char *argv[])
 {
     initClk();
-    
-    //TODO it needs to get the remaining time from somewhere
-    //remainingtime = ??;
-    while (remainingtime > 0)
+
+    // Check if the command-line argument is provided
+    if (argc < 2)
     {
-        // remainingtime = ??;
+        printf("Error: remaining time not provided\n");
+        return 1;
     }
-    
+
+    // Convert the command-line argument to integer
+    remainingtime = atoi(argv[1]);
+
+    // Get the start time
+    int starttime = getClk();
+
+    while (getClk() - starttime < remainingtime)
+    {
+        // Do nothing, just wait
+    }
+
+    kill(getppid(), SIGUSR1);
+
     destroyClk(false);
-    
+
     return 0;
 }
