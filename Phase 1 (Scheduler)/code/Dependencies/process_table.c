@@ -50,3 +50,18 @@ void pct_displayProcessTable(ProcessTable *table) {
         }
     }
 }
+
+void pct_clearProcessTable(ProcessTable *table) {
+    for (int i = 0; i < MAX_PROCESSES; i++) {
+        if (table->processes[i] != NULL) {
+            free(table->processes[i]);
+            table->processes[i] = NULL;
+        }
+    }
+    table->size = 0;
+}
+
+void pct_freeProcessTable(ProcessTable *table) {
+    pct_clearProcessTable(table);
+    free(table);
+}
