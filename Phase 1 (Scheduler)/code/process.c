@@ -2,9 +2,16 @@
 
 /* Modify this file as needed*/
 int remainingtime;
+bool shouldCount = true;
+int time = 0;
 
-void timeStep(int signum) {
-    remainingtime--;
+void stopProcess(int signum) {
+    shouldCount = false;
+}
+
+void continueProcess(int signum) {
+    shouldCount = true;
+    time = getClk();
 }
 
 void finish(int signum) {
@@ -18,10 +25,18 @@ void finish(int signum) {
 int main(int agrc, char * argv[])
 {
     initClk();
-    signal(SIGUSR1, timeStep);
+    signal(SIGUSR1, stopProcess);
+    signal(SIGUSR2, continueProcess);
     signal(SIGINT, finish);
     remainingtime = atoi(argv[1]);
-    while (remainingtime > 0);
+    time = getClk();
+    while (remainingtime > 0) {
+        if(!shouldCount) continue;
+        while(time == getClk());
+        int curTime = getClk();
+        remainingtime -= curTime - time;
+        time = curTime;
+    }
     raise(SIGINT);
     return 0;
 }
