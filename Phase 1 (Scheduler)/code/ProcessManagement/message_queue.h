@@ -37,7 +37,7 @@ int mqSend(int msgQId, ProcessMessage message);
  * Receives a process message from the specified message queue without blocking.
  * @param msgQId The message queue ID.
  * @param message Pointer to where the received message should be stored.
- * @return `int` 0 if message received, -1 on error, 1 if no message is available.
+ * @return `int` 1 if message received, -1 on error, 0 if no message is available.
  */
 int mqReceiveNonBlocking(int msgQId, ProcessMessage *message);
 

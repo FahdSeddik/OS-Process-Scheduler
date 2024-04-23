@@ -38,12 +38,12 @@ int mqReceiveNonBlocking(int msgQId, ProcessMessage *message) {
     if (ret == -1) {
         if (errno == ENOMSG) {
             // No message available
-            return 1;
+            return 0;
         }
         perror("Failed to receive message");
         return -1;
     }
-    return 0;
+    return 1;
 }
 
 int mqDelete(int msgQId) {

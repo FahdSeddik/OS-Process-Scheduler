@@ -18,6 +18,7 @@ Logger* loggerInit(const char* logPath, const char* perfPath) {
     fprintf(logger->logFile, "#At time x process y state arr w total z remain y wait k\n");
     logger->totalRuntime = 0;
     logger->totalWaitingTime = 0;
+    logger->cpuWaitingTime = 0;
     logger->totalTurnaroundTime = 0;
     logger->totalWeightedTurnaroundTime = 0;
     logger->processCount = 0;
@@ -34,6 +35,10 @@ void loggerLogProcessEvent(Logger* logger, int time, int pid, const char* state,
     }
 }
 
+void loggerUpdateCPUWait(Logger* logger, int waitTime) {
+    logger->cpuWaitingTime += waitTime;
+}
+
 void loggerUpdatePerformanceMetrics(Logger* logger, double runtime, double wait, double ta, double wta) {
     logger->totalRuntime += runtime;
     logger->totalWaitingTime += wait;
@@ -43,7 +48,7 @@ void loggerUpdatePerformanceMetrics(Logger* logger, double runtime, double wait,
 }
 
 void loggerWritePerformanceData(Logger* logger) {
-    double cpu_utilization = (logger->totalRuntime / (logger->totalRuntime + logger->totalWaitingTime)) * 100;
+    double cpu_utilization = (logger->totalRuntime / (logger->totalRuntime + logger->cpuWaitingTime)) * 100;
     double avg_waiting_time = logger->totalWaitingTime / logger->processCount;
     double avg_turnaround_time = logger->totalTurnaroundTime / logger->processCount;
     double avg_wta = logger->totalWeightedTurnaroundTime / logger->processCount;

@@ -6,6 +6,9 @@
 #include <string.h>
 #include <time.h>
 
+// TODO: logger needs to be adjusted to calculate standard deviation (need an array to store all values for wta)
+
+
 /**
  * Logger structure to hold log and performance data
  */
@@ -14,6 +17,7 @@ typedef struct Logger {
     FILE *perfFile;
     double totalRuntime;
     double totalWaitingTime;
+    double cpuWaitingTime;
     double totalTurnaroundTime;
     double totalWeightedTurnaroundTime;
     int processCount;
@@ -43,7 +47,14 @@ Logger* loggerInit(const char* logPath, const char* perfPath);
 void loggerLogProcessEvent(Logger* logger, int time, int pid, const char* state, int arrival, int total, int remain, int wait, int ta, double wta);
 
 /**
- * Updates performance metrics in the logger
+ * Updates logger cpu waiting time
+ * @param logger  Pointer to the logger structure
+ * @param waitTime wait time to add for the CPU
+ */
+void loggerUpdateCPUWait(Logger* logger, int waitTime);
+
+/**
+ * Updates performance metrics in the logger should be called when process stops
  * @param logger Pointer to the Logger structure
  * @param runtime Runtime to add
  * @param wait Wait time to add
