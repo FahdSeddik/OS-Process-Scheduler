@@ -1,10 +1,28 @@
 #include "message_queue.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 
-int mqCreate(void) {
-    return msgget(IPC_PRIVATE, 0666 | IPC_CREAT);
+int mqCreate(const char* path, int id) {
+    key_t key;
+    int msgid;
+
+    // Generate a unique key from the given path and project identifier
+    key = ftok(path, id);
+    if (key == -1) {
+        perror("ftok error");
+        return -1;
+    }
+
+    // Attempt to create the message queue, or access it if it already exists
+    msgid = msgget(key, 0666 | IPC_CREAT);
+    if (msgid == -1) {
+        perror("msgget error");
+        return -1;
+    }
+
+    return msgid;
 }
 
 int mqSend(int msgQId, ProcessMessage message) {

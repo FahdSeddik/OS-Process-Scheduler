@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
     // openFiles();
     // setupSignals();
     Logger* logger = loggerInit("./logs/scheduler.log", "./logs/scheduler.perf");
-    int msgQueueId = mqCreate();
+    int msgQueueId = mqCreate("./Keys/key1", 0);
 
     char *algorithm = argv[1];
     int quantum = 0;
