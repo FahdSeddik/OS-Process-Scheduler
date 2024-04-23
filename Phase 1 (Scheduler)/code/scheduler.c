@@ -11,6 +11,8 @@
 #include "Algorithms/hpf.h"
 #include "Algorithms/rr.h"
 #include "Algorithms/srtn.h"
+#include "Logging/logger.h"
+#include "ProcessManagement/message_queue.h"
 // structure for message queue holds process data
 struct msg_buffer {
     int priority;
@@ -30,8 +32,8 @@ FILE *schedulerPerf = NULL;
 // function declarations
 // void sigusr1Handler(int signum);
 // void sigusr2Handler(int signum);
-void openFiles();
-int createMessageQueue();
+// void openFiles();
+// int createMessageQueue();
 // void setupSignals();
 
 // #==================#
@@ -43,65 +45,70 @@ int main(int argc, char *argv[]) {
         exit(-1);
     }
 
-    processMsgqID = createMessageQueue(); // channel betweeen scheduler and process generator
-    openFiles();
+    // processMsgqID = createMessageQueue(); // channel betweeen scheduler and process generator
+    // openFiles();
     // setupSignals();
-    fprintf(schedulerLog, "#At time x process y state arr w total z remain y wait k\n");
+    Logger* logger = loggerInit("./logs/scheduler.log", "./logs/scheduler.perf");
+    int msgQueueId = mqCreate();
 
     char *algorithm = argv[1];
     int quantum = 0;
 
     if (strcmp(algorithm, "HPF") == 0) {
-        HPF(0);
+        HPF(msgQueueId, logger);
     } else if (strcmp(algorithm, "SRTN") == 0) {
-        SRTN(0);
+        SRTN(msgQueueId, logger);
     } else if (strcmp(algorithm, "RR") == 0) {
         if (argc < 3) {
             perror("Invalid number of arguments");
             exit(-1);
         }
         quantum = atoi(argv[2]);
-        RR(0, quantum);
+        RR(msgQueueId, quantum, logger);
     } else {
         perror("Invalid algorithm");
+        exit(-1);
     }
+
+    loggerWritePerformanceData(logger);
 
     // cleanup
     destroyClk(true);
     fclose(schedulerLog);
+    loggerDestroy(logger);
     fclose(schedulerPerf);
     msgctl(processMsgqID, IPC_RMID, NULL);
     return 0;
 }
 
-// ============================================
-// ============ GENERAL FUNCTIONS =============
-// ============================================
-void openFiles() {
-    // files
-    schedulerLog = fopen("Scheduler.log", "w");
-    if (schedulerLog == NULL) {
-        perror("Error in opening Scheduler.log file!");
-        exit(-1);
-    }
+// // ============================================
+// // ============ GENERAL FUNCTIONS =============
+// // ============================================
+// void openFiles() {
+//     // files
+//     schedulerLog = fopen("Scheduler.log", "w");
+//     if (schedulerLog == NULL) {
+//         perror("Error in opening Scheduler.log file!");
+//         exit(-1);
+//     }
 
-    schedulerPerf = fopen("Scheduler.perf", "w");
-    if (schedulerPerf == NULL) {
-        perror("Error in opening Scheduler.perf file!");
-        exit(-1);
-    }
-}
+//     schedulerPerf = fopen("Scheduler.perf", "w");
+//     if (schedulerPerf == NULL) {
+//         perror("Error in opening Scheduler.perf file!");
+//         exit(-1);
+//     }
+// }
 
-int createMessageQueue() {
-    key_t MSGKEY;
-    MSGKEY = ftok("keyfile", 33); // TODO: change 33 if needed
-    int processMsgqID = msgget(MSGKEY, 0666 | IPC_CREAT);
-    if (processMsgqID == -1) {
-        perror("Error in creating process message queue!");
-        exit(-1);
-    }
-    return processMsgqID;
-}
+// int createMessageQueue() {
+//     key_t MSGKEY;
+//     MSGKEY = ftok("keyfile", 33); // TODO: change 33 if needed
+//     int processMsgqID = msgget(MSGKEY, 0666 | IPC_CREAT);
+//     if (processMsgqID == -1) {
+//         perror("Error in creating process message queue!");
+//         exit(-1);
+//     }
+//     return processMsgqID;
+// }
 
 // void setupSignals() {
 //     struct sigaction sa;
