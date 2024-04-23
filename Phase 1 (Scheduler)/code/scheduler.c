@@ -13,30 +13,7 @@
 #include "Algorithms/srtn.h"
 #include "Logging/logger.h"
 #include "ProcessManagement/message_queue.h"
-// structure for message queue holds process data
-struct msg_buffer {
-    int priority;
-    int arrivalTime;
-    int runningTime;
-} message;
 
-// #==================#
-// # GLOBAL VARIABLES #
-// #==================#
-int processMsgqID = -1;
-
-// files
-FILE *schedulerLog = NULL;
-FILE *schedulerPerf = NULL;
-
-// function declarations
-// void sigusr1Handler(int signum);
-// void sigusr2Handler(int signum);
-// void openFiles();
-// int createMessageQueue();
-// void setupSignals();
-
-// #==================#
 int main(int argc, char *argv[]) {
     initClk();
 
@@ -45,9 +22,6 @@ int main(int argc, char *argv[]) {
         exit(-1);
     }
 
-    // processMsgqID = createMessageQueue(); // channel betweeen scheduler and process generator
-    // openFiles();
-    // setupSignals();
     Logger* logger = loggerInit("./logs/scheduler.log", "./logs/scheduler.perf");
     int msgQueueId = mqCreate("./Keys/key1", 0);
 
@@ -74,41 +48,9 @@ int main(int argc, char *argv[]) {
 
     // cleanup
     destroyClk(true);
-    fclose(schedulerLog);
     loggerDestroy(logger);
-    fclose(schedulerPerf);
-    msgctl(processMsgqID, IPC_RMID, NULL);
     return 0;
 }
-
-// // ============================================
-// // ============ GENERAL FUNCTIONS =============
-// // ============================================
-// void openFiles() {
-//     // files
-//     schedulerLog = fopen("Scheduler.log", "w");
-//     if (schedulerLog == NULL) {
-//         perror("Error in opening Scheduler.log file!");
-//         exit(-1);
-//     }
-
-//     schedulerPerf = fopen("Scheduler.perf", "w");
-//     if (schedulerPerf == NULL) {
-//         perror("Error in opening Scheduler.perf file!");
-//         exit(-1);
-//     }
-// }
-
-// int createMessageQueue() {
-//     key_t MSGKEY;
-//     MSGKEY = ftok("keyfile", 33); // TODO: change 33 if needed
-//     int processMsgqID = msgget(MSGKEY, 0666 | IPC_CREAT);
-//     if (processMsgqID == -1) {
-//         perror("Error in creating process message queue!");
-//         exit(-1);
-//     }
-//     return processMsgqID;
-// }
 
 // void setupSignals() {
 //     struct sigaction sa;
@@ -129,12 +71,6 @@ int main(int argc, char *argv[]) {
 //         exit(1);
 //     }
 // }
-
-void logPerformance() {
-    // TODO: implement
-}
-
-
 
 // void logProcessExecution(PCB *currentProcessPCB, bool isStopped) {
 //     // state is started , stopped, finished, resumed
