@@ -8,7 +8,7 @@ LOGG = ./Logging/logger.c
 
 # Any used files that are needed in each of those should be here
 scheduler := $(DEP) $(ALGO) $(PMGR) $(LOGG) # This means that when compiling scheduler it will add those c files as pre-compile
-generator := 
+generator := $(PMGR)
 
 # Repeated variables
 build_dir := build

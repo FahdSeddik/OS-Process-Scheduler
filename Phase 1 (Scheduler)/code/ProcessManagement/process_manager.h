@@ -16,11 +16,16 @@
 /**
  * Runs a new process using fork and exec.
  * @param logger A pointer to the logger.
- * @param remainingTime Remaining time for the process to run.
- * @param programName The name of the program to execute.
+ * @param programPath A path to the compiled binary for the program.
+ * @param argv Array of arguments to be passed.
  * @return `pid_t` The PID of the forked process.
+ * 
+ * @example
+ * char* schedulerArgs[2] = {"RR", "1"};
+ * // providing a program path relative to root process path (process_generator.c is always root process)
+ * pmRunProcess(NULL, "./build/scheduler.out", schedulerArgs);
  */
-pid_t pmRunProcess(Logger* logger, int remainingTime);
+pid_t pmRunProcess(Logger* logger, const char* programPath, char * const argv[]);
 
 /**
  * Preempts the currently running process.
@@ -37,5 +42,13 @@ int pmPreemptProcess(pid_t processId, Logger* logger);
  * @return `int` 0 on success, -1 on error.
  */
 int pmContinueProcess(pid_t processId, Logger* logger);
+
+/**
+ * Sends `SIGINT` to `processId`
+ * NOTE: This would only be used by root processes such as process_generator to kill scheduler 
+ * (probably wont need it anywhere else)
+ * @param processId ID of the process to kill.
+ */
+int pmKillProcess(pid_t processId);
 
 #endif // PROCESS_MANAGER_H

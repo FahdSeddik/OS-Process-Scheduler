@@ -2,7 +2,7 @@
 #include <signal.h>
 #include <stdio.h>
 
-pid_t pmRunProcess(Logger* logger, int remainingTime) {
+pid_t pmRunProcess(Logger* logger, const char* programPath, char * const argv[]) {
     // TODO: perform logging here
     // Hint: you may need to adjust parameters/include extra files
 
@@ -14,10 +14,7 @@ pid_t pmRunProcess(Logger* logger, int remainingTime) {
         return -1;
     } else if (pid == 0) {
         // Child process
-        char str[12];
-        sprintf(str, "%d", remainingTime);
-        const char* programName = "./build/process.out";
-        execl(programName, programName, str, NULL);
+        execvp(programPath, argv);
         // If execl returns, there was an error
         perror("Failed to execute process");
         _exit(1);
@@ -37,4 +34,8 @@ int pmContinueProcess(pid_t processId, Logger* logger) {
     // TODO: perform logging here
     // Hint: you may need to adjust parameters/include extra files
     return kill(processId, CONTINUE);
+}
+
+int pmKillProcess(pid_t processId) {
+    return kill(processId, SIGINT);
 }
