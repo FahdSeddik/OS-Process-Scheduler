@@ -69,3 +69,9 @@ mh_HeapNode mh_getTop(const mh_MinHeap *minHeap) {
     }
     return minHeap->elements[0];
 }
+
+void mh_free(mh_MinHeap * minHeap) {
+    free(minHeap->elements);
+    minHeap->elements = NULL;
+    free(minHeap);
+}

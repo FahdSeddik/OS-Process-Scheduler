@@ -51,4 +51,10 @@ mh_HeapNode mh_extractMin(mh_MinHeap *minHeap);
  */
 mh_HeapNode mh_getTop(const mh_MinHeap *minHeap); 
 
+/**
+ * Frees the MinHeap
+ * @param minHeap Pointer to the MinHeap
+ */
+void mh_free(mh_MinHeap * minHeap);
+
 #endif // MINHEAP_H
