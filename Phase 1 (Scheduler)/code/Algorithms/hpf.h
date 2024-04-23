@@ -1,16 +1,19 @@
 #ifndef HPF_H
 #define HPF_H
 
+#include "../Logging/logger.h"
+
 
 // TODO: Implement this function in hpf.c
 // Note: you may change its interface as you like remove/add anything this is just a draft
+
 /**
  * Performs Highest Priority First (HPF) scheduling algorithm
  * given a Process Table
- * 
- @param msgQueueId An id for the message queue.
+ * @param msgQueueId An id for the message queue.
+ * @param logger A pointer to the logger.
  */
-void HPF(int msgQueueId);
+void HPF(int msgQueueId, Logger* logger);
 
 
 

@@ -18,7 +18,7 @@ typedef struct {
  *
  * @param table Pointer to the process table to initialize.
  */
-void pct_initProcessTable(ProcessTable *table);
+void pctInit(ProcessTable *table);
 
 /**
  * Adds a new PCB to the process table.
@@ -27,7 +27,7 @@ void pct_initProcessTable(ProcessTable *table);
  * @param process Pointer to the PCB to add.
  * @return int Returns 0 if successful, or -1 if the table is full.
  */
-int pct_addProcess(ProcessTable *table, PCB *process);
+int pctAddProcess(ProcessTable *table, PCB *process);
 
 /**
  * Finds a PCB in the process table by its ID.
@@ -36,7 +36,7 @@ int pct_addProcess(ProcessTable *table, PCB *process);
  * @param id The ID of the process to find.
  * @return PCB* Returns a pointer to the PCB if found, or NULL if not found.
  */
-PCB* pct_findProcessById(ProcessTable *table, int id);
+PCB* pctFindProcessById(ProcessTable *table, int id);
 
 /**
  * Removes a PCB from the process table by its ID.
@@ -45,21 +45,21 @@ PCB* pct_findProcessById(ProcessTable *table, int id);
  * @param id The ID of the process to remove.
  * @return int Returns 0 if successful, or -1 if the process is not found.
  */
-int pct_removeProcess(ProcessTable *table, int id);
+int pctRemoveProcess(ProcessTable *table, int id);
 
 /**
  * Displays all processes in the process table.
  *
  * @param table Pointer to the process table.
  */
-void pct_displayProcessTable(ProcessTable *table);
+void pctDisplay(ProcessTable *table);
 
 /**
  * Clears/Frees all records from process table
  * 
  * @param table Pointer to the process table.
  */
-void pct_clearProcessTable(ProcessTable *table);
+void pctClear(ProcessTable *table);
 
 /**
  * Clears all records from process table and then frees the
@@ -67,6 +67,6 @@ void pct_clearProcessTable(ProcessTable *table);
  * 
  * @param table Pointer to the process table.
  */
-void pct_freeProcessTable(ProcessTable *table);
+void pctFree(ProcessTable *table);
 
 #endif // PCT_H

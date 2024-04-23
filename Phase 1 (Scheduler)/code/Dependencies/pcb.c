@@ -1,7 +1,7 @@
 // pcb.c
 #include "pcb.h"
 
-void pcb_initPCB(PCB *pcb, int id, int priority, int arrivalTime, int runningTime) {
+void pcbInit(PCB *pcb, int id, int priority, int arrivalTime, int runningTime) {
     pcb->id = id;
     pcb->priority = priority;
     pcb->arrivalTime = arrivalTime;
@@ -16,18 +16,18 @@ void pcb_initPCB(PCB *pcb, int id, int priority, int arrivalTime, int runningTim
     pcb->state = READY;
 }
 
-void pcb_updateProcessState(PCB *pcb, ProcessState newState) {
+void pcbUpdateProcessState(PCB *pcb, ProcessState newState) {
     pcb->state = newState;
 }
 
-void pcb_calculateWaitingTime(PCB *pcb, int current_time) {
+void pcbCalculateWaitingTime(PCB *pcb, int current_time) {
     if (pcb->state == READY) {
         pcb->waitingTime += (current_time - pcb->lastExecTime);
     }
     pcb->lastExecTime = current_time; // Update last execution time to current time
 }
 
-void pcb_calculateTurnaroundTime(PCB *pcb) {
+void pcbCalculateTurnaroundTime(PCB *pcb) {
     pcb->turnaroundTime = pcb->finishTime - pcb->arrivalTime;
     pcb->weightedTurnaroundTime = (double)pcb->turnaroundTime / pcb->runningTime;
 }

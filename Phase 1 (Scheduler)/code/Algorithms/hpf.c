@@ -7,7 +7,7 @@
     ===========================================================
 */
 
-void HPF(int msgQueueId) {
+void HPF(int msgQueueId, Logger* logger) {
     // TODO: implement this function
     // NOTE: you may want to change its interface
 }

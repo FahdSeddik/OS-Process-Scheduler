@@ -7,7 +7,7 @@
     ===========================================================
 */
 
-void RR(int msgQueueId, int quantum) {
+void RR(int msgQueueId, int quantum, Logger* logger) {
     // TODO: implement this function
     // NOTE: you may want to change its interface
 

@@ -2,13 +2,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void mh_swapHeapNode(mh_HeapNode *a, mh_HeapNode *b) {
-    mh_HeapNode temp = *a;
+static void mh_swapHeapNode(mhHeapNode *a, mhHeapNode *b) {
+    mhHeapNode temp = *a;
     *a = *b;
     *b = temp;
 }
 
-void mh_minHeapify(mh_MinHeap *minHeap, int idx) {
+void mh_minHeapify(mhMinHeap *minHeap, int idx) {
     int smallest = idx;
     int left = 2 * idx + 1;
     int right = 2 * idx + 2;
@@ -25,15 +25,15 @@ void mh_minHeapify(mh_MinHeap *minHeap, int idx) {
     }
 }
 
-mh_MinHeap* mh_createMinHeap(int capacity) {
-    mh_MinHeap *minHeap = (mh_MinHeap *) malloc(sizeof(mh_MinHeap));
+mhMinHeap* mhCreate(int capacity) {
+    mhMinHeap *minHeap = (mhMinHeap *) malloc(sizeof(mhMinHeap));
     minHeap->size = 0;
     minHeap->capacity = capacity;
-    minHeap->elements = (mh_HeapNode *) malloc(capacity * sizeof(mh_HeapNode));
+    minHeap->elements = (mhHeapNode *) malloc(capacity * sizeof(mhHeapNode));
     return minHeap;
 }
 
-void mh_insertMinHeap(mh_MinHeap *minHeap, int processId, int key) {
+void mhInsert(mhMinHeap *minHeap, int processId, int key) {
     if (minHeap->size == minHeap->capacity) {
         printf("MinHeap overflow\n");
         return;
@@ -50,11 +50,11 @@ void mh_insertMinHeap(mh_MinHeap *minHeap, int processId, int key) {
     }
 }
 
-mh_HeapNode mh_extractMin(mh_MinHeap *minHeap) {
+mhHeapNode mhExtractMin(mhMinHeap *minHeap) {
     if (minHeap->size <= 0)
-        return (mh_HeapNode){-1, -1};
+        return (mhHeapNode){-1, -1};
 
-    mh_HeapNode root = minHeap->elements[0];
+    mhHeapNode root = minHeap->elements[0];
     minHeap->elements[0] = minHeap->elements[minHeap->size - 1];
     minHeap->size--;
     mh_minHeapify(minHeap, 0);
@@ -62,15 +62,15 @@ mh_HeapNode mh_extractMin(mh_MinHeap *minHeap) {
     return root;
 }
 
-mh_HeapNode mh_getTop(const mh_MinHeap *minHeap) {
+mhHeapNode mhGetTop(const mhMinHeap *minHeap) {
     if (minHeap->size <= 0) {
         fprintf(stderr, "MinHeap is empty\n");
-        return (mh_HeapNode){-1, -1};  // Return invalid HeapNode if heap is empty
+        return (mhHeapNode){-1, -1};  // Return invalid HeapNode if heap is empty
     }
     return minHeap->elements[0];
 }
 
-void mh_free(mh_MinHeap * minHeap) {
+void mhFree(mhMinHeap * minHeap) {
     free(minHeap->elements);
     minHeap->elements = NULL;
     free(minHeap);

@@ -7,7 +7,7 @@
     ===========================================================
 */
 
-void SRTN(int msgQueueId) {
+void SRTN(int msgQueueId, Logger* logger) {
     // TODO: implement this function
     // NOTE: you may want to change its interface
 }

@@ -35,7 +35,7 @@ typedef struct {
  * @param arrivalTime The time when the process is scheduled to arrive.
  * @param runningTime The total CPU burst time required by the process.
  */
-void pcb_initPCB(PCB *pcb, int id, int priority, int arrivalTime, int runningTime);
+void pcbInit(PCB *pcb, int id, int priority, int arrivalTime, int runningTime);
 
 /**
  * Updates the state of a process represented by a PCB.
@@ -43,7 +43,7 @@ void pcb_initPCB(PCB *pcb, int id, int priority, int arrivalTime, int runningTim
  * @param pcb Pointer to the PCB whose state is to be updated.
  * @param new_state The new state to which the process should be updated.
  */
-void pcb_updateProcessState(PCB *pcb, ProcessState newState);
+void pcbUpdateProcessState(PCB *pcb, ProcessState newState);
 
 /**
  * Calculates and updates the waiting time for the process based on the current system time.
@@ -51,7 +51,7 @@ void pcb_updateProcessState(PCB *pcb, ProcessState newState);
  * @param pcb Pointer to the PCB of the process whose waiting time is to be updated.
  * @param currentTime The current time in the system clock.
  */
-void pcb_calculateWaitingTime(PCB *pcb, int currentTime);
+void pcbCalculateWaitingTime(PCB *pcb, int currentTime);
 
 /**
  * Calculates and records the turnaround time for the process.
@@ -59,6 +59,6 @@ void pcb_calculateWaitingTime(PCB *pcb, int currentTime);
  *
  * @param pcb Pointer to the PCB of the process.
  */
-void pcb_calculateTurnaroundTime(PCB *pcb);
+void pcbCalculateTurnaroundTime(PCB *pcb);
 
 #endif // PCB_H
