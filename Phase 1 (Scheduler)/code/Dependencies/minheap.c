@@ -2,13 +2,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void mh_swapHeapNode(mhHeapNode *a, mhHeapNode *b) {
+static void mhSwapHeapNode(mhHeapNode *a, mhHeapNode *b) {
     mhHeapNode temp = *a;
     *a = *b;
     *b = temp;
 }
 
-void mh_minHeapify(mhMinHeap *minHeap, int idx) {
+void mhMinHeapify(mhMinHeap *minHeap, int idx) {
     int smallest = idx;
     int left = 2 * idx + 1;
     int right = 2 * idx + 2;
@@ -20,8 +20,8 @@ void mh_minHeapify(mhMinHeap *minHeap, int idx) {
         smallest = right;
 
     if (smallest != idx) {
-        mh_swapHeapNode(&minHeap->elements[idx], &minHeap->elements[smallest]);
-        mh_minHeapify(minHeap, smallest);
+        mhSwapHeapNode(&minHeap->elements[idx], &minHeap->elements[smallest]);
+        mhMinHeapify(minHeap, smallest);
     }
 }
 
@@ -45,7 +45,7 @@ void mhInsert(mhMinHeap *minHeap, int processId, int key) {
 
     // Heapify up
     while (i != 0 && minHeap->elements[(i - 1) / 2].key > minHeap->elements[i].key) {
-        mh_swapHeapNode(&minHeap->elements[i], &minHeap->elements[(i - 1) / 2]);
+        mhSwapHeapNode(&minHeap->elements[i], &minHeap->elements[(i - 1) / 2]);
         i = (i - 1) / 2;
     }
 }
@@ -57,7 +57,7 @@ mhHeapNode mhExtractMin(mhMinHeap *minHeap) {
     mhHeapNode root = minHeap->elements[0];
     minHeap->elements[0] = minHeap->elements[minHeap->size - 1];
     minHeap->size--;
-    mh_minHeapify(minHeap, 0);
+    mhMinHeapify(minHeap, 0);
 
     return root;
 }
