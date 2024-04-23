@@ -4,7 +4,7 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
-#define MESSAGE_MTYPE 1  // This is a default message type for simple examples
+#define MESSAGE_MTYPE 0  // This is a default message type for simple examples
 
 /**
  * Structure to hold process data to be sent via message queues.
