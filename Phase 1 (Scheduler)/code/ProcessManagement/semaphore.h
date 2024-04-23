@@ -34,4 +34,11 @@ int semDown(int semid);
  */
 int semUp(int semid);
 
+/**
+ * Removes the semaphore from the system.
+ * @param semid int The semaphore identifier.
+ * @return int 0 on success, or -1 on error.
+ */
+int semDelete(int semid);
+
 #endif // SEMAPHORE_MANAGER_H

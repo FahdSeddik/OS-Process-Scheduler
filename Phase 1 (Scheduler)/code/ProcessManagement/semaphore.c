@@ -60,3 +60,12 @@ int semUp(int semid) {
 
     return 0;
 }
+
+int semDelete(int semid) {
+    if (semctl(semid, 0, IPC_RMID) == -1) {
+        perror("semctl (IPC_RMID) error");
+        return -1;
+    }
+
+    return 0;
+}
