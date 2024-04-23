@@ -54,5 +54,19 @@ int pct_removeProcess(ProcessTable *table, int id);
  */
 void pct_displayProcessTable(ProcessTable *table);
 
+/**
+ * Clears/Frees all records from process table
+ * 
+ * @param table Pointer to the process table.
+ */
+void pct_clearProcessTable(ProcessTable *table);
+
+/**
+ * Clears all records from process table and then frees the
+ * table as well
+ * 
+ * @param table Pointer to the process table.
+ */
+void pct_freeProcessTable(ProcessTable *table);
 
 #endif // PCT_H
