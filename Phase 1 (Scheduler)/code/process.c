@@ -1,32 +1,27 @@
 #include "headers.h"
 
+/* Modify this file as needed*/
 int remainingtime;
 
-int main(int argc, char *argv[])
+void timeStep(int signum) {
+    remainingtime--;
+}
+
+void finish(int signum) {
+    // TODO: some logic m4 3aref lw hane7tag wala la2
+    
+    signal(SIGINT, SIG_DFL);
+    destroyClk(false);
+    raise(SIGINT);
+}
+
+int main(int agrc, char * argv[])
 {
     initClk();
-
-    // Check if the command-line argument is provided
-    if (argc < 2)
-    {
-        printf("Error: remaining time not provided\n");
-        return 1;
-    }
-
-    // Convert the command-line argument to integer
+    signal(SIGUSR1, timeStep);
+    signal(SIGINT, finish);
     remainingtime = atoi(argv[1]);
-
-    // Get the start time
-    int starttime = getClk();
-
-    while (getClk() - starttime < remainingtime)
-    {
-        // Do nothing, just wait
-    }
-
-    kill(getppid(), SIGUSR1);
-
-    destroyClk(false);
-
+    while (remainingtime > 0);
+    raise(SIGINT);
     return 0;
 }

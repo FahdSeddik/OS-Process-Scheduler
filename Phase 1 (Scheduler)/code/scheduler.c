@@ -72,53 +72,12 @@ int main(int argc, char *argv[]) {
 //     }
 // }
 
-// void logProcessExecution(PCB *currentProcessPCB, bool isStopped) {
-//     // state is started , stopped, finished, resumed
-//     // while the process state is READY, RUNNING, BLOCKED, TERMINATED
-//     // map the state to the corresponding string
-//     char *state;
-
-//     switch (currentProcessPCB->state) {
-//         case READY:
-//             state = "started";
-//             break;
-//         case RUNNING:
-//             if (isStopped) {
-//                 state = "stopped";
-//             } else {
-//                 state = "resumed";
-//             }
-//             break;
-//         case BLOCKED:
-//             state = "blocked";
-//             break;
-//         case TERMINATED:
-//             state = "finished";
-//             break;
-//         default:
-//             state = "unknown";
-//     }
-
-//     if (state == "finished") {
-//         pcb_calculateTurnaroundTime(currentProcessPCB);
-//         fprintf(schedulerLog, "At time %d process %d state %s arr %d total %d remain %d wait %d TA %d WTA %f\n",
-//                 getClk(), currentProcess->id, state, currentProcess->arrivalTime, currentProcess->waitingTime, currentProcess->runningTime, currentProcess->remainingTime, currentProcess->waitingTime, currentProcessPCB->turnaroundTime, currentProcessPCB->weightedTurnaroundTime);
-//     }
-//     else {
-//         fprintf(schedulerLog, "At time %d process %d state %s arr %d total %d remain %d wait %d\n",
-//                 getClk(), currentProcess->id, state, currentProcess->arrivalTime, currentProcess->waitingTime, currentProcess->runningTime, currentProcess->remainingTime, currentProcess->waitingTime);
-//     }
-// }
-
 // bool isAllProcessesCompleted(q_Queue *processQueue) {
 //     if (processGeneratorIsDone && isEmpty(processQueue) == 1) {
 //         return true;
 //     }
 //     return false;
 // }
-
-
-
 
 // // the process is finished
 // void sigusr1Handler(int signum)
