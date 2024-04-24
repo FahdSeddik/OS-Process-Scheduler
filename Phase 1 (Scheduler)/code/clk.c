@@ -6,6 +6,7 @@
  */
 
 #include "headers.h"
+#include "clk_utils.h"
 
 int shmid;
 
