@@ -9,11 +9,11 @@
  * Performs Round Robin (RR) scheduling algorithm
  * 
  * @param msgQueueId An id for the message queue.
+ * @param semSyncRcv An id for the semaphore to be used for guarantee wait for process gen.
  * @param quantum A value for the quantum used in RR algorithm.
  * @param logger A pointer to the logger.
  */
-void RR(int msgQueueId, int quantum, Logger* logger);
-
+void initRR(int msgQueueId, int semSyncRcv, int quantum, Logger* logger);
 
 
 #endif // RR_H

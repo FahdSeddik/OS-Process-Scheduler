@@ -27,16 +27,31 @@ void mhMinHeapify(mhMinHeap *minHeap, int idx) {
 
 mhMinHeap* mhCreate(int capacity) {
     mhMinHeap *minHeap = (mhMinHeap *) malloc(sizeof(mhMinHeap));
+    if (!minHeap) {
+        fprintf(stderr, "Memory allocation failed\n");
+        return NULL;
+    }
     minHeap->size = 0;
     minHeap->capacity = capacity;
     minHeap->elements = (mhHeapNode *) malloc(capacity * sizeof(mhHeapNode));
+    if (!minHeap->elements) {
+        free(minHeap);
+        fprintf(stderr, "Memory allocation failed\n");
+        return NULL;
+    }
     return minHeap;
 }
 
 void mhInsert(mhMinHeap *minHeap, PCB* pcb, int key) {
-    if (minHeap->size == minHeap->capacity) {
-        printf("MinHeap overflow\n");
-        return;
+     if (minHeap->size == minHeap->capacity) {
+        int newCapacity = minHeap->capacity * 2;
+        mhHeapNode* newElements = (mhHeapNode *) realloc(minHeap->elements, newCapacity * sizeof(mhHeapNode));
+        if (!newElements) {
+            fprintf(stderr, "Heap resize failed\n");
+            return;
+        }
+        minHeap->elements = newElements;
+        minHeap->capacity = newCapacity;
     }
 
     int i = minHeap->size++;
@@ -66,6 +81,10 @@ PCB* mhExtractMin(mhMinHeap *minHeap) {
 PCB* mhGetTop(const mhMinHeap *minHeap) {
     if (minHeap->size <= 0) return NULL;
     return minHeap->elements[0].pcb;
+}
+
+bool mhIsEmpty(const mhMinHeap* minHeap) {
+    return minHeap->size == 0;
 }
 
 void mhFree(mhMinHeap * minHeap) {

@@ -2,6 +2,7 @@
 #define MH_MINHEAP_H
 
 #include "pcb.h"
+#include "../Dependencies/bool.h"
 
 /**
  * Structure representing a single node in the MinHeap.
@@ -52,6 +53,12 @@ PCB* mhExtractMin(mhMinHeap *minHeap);
  * @return The minimum PCB pointer, or NULL if empty
  */
 PCB* mhGetTop(const mhMinHeap *minHeap); 
+
+/**
+ * Checks if the queue is empty.
+ * @param minHeap Pointer to the MinHeap.
+ */
+bool mhIsEmpty(const mhMinHeap* minHeap);
 
 /**
  * Frees the MinHeap
