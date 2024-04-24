@@ -8,7 +8,7 @@ typedef enum {
 } ProcessState;
 
 typedef struct {
-    int id;                 // Unique process ID
+    int processId;          // Unique process ID (actual)
     ProcessState state;     // State of the process (READY, RUNNING, BLOCKED, TERMINATED)
     int priority;           // Priority level (used in HPF)
     int arrivalTime;        // Time when process arrives and should be considered by the scheduler

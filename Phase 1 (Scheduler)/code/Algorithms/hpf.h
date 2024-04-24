@@ -9,7 +9,6 @@
 
 /**
  * Performs Highest Priority First (HPF) scheduling algorithm
- * given a Process Table
  * @param msgQueueId An id for the message queue.
  * @param logger A pointer to the logger.
  */

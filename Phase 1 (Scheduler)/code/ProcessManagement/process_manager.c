@@ -33,6 +33,7 @@ int pmPreemptProcess(pid_t processId, Logger* logger) {
 int pmContinueProcess(pid_t processId, Logger* logger) {
     // TODO: perform logging here
     // Hint: you may need to adjust parameters/include extra files
+    kill(processId, SIGCONT);
     return kill(processId, CONTINUE);
 }
 

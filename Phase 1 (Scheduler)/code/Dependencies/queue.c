@@ -12,13 +12,13 @@ qQueue *qCreate() {
     return queue;
 }
 
-void qEnqueue(qQueue *queue, int processId) {
+void qEnqueue(qQueue *queue, PCB* pcb) {
     qQueueNode *newNode = (qQueueNode *)malloc(sizeof(qQueueNode));
     if (!newNode) {
         fprintf(stderr, "Unable to allocate memory for queue node\n");
         return;
     }
-    newNode->processId = processId;
+    newNode->pcb = pcb;
     newNode->next = NULL;
 
     if (queue->rear == NULL) {
@@ -30,30 +30,26 @@ void qEnqueue(qQueue *queue, int processId) {
     queue->rear = newNode;
 }
 
-int qDequeue(qQueue *queue) {
+PCB* qDequeue(qQueue *queue) {
     if (queue->front == NULL) {
         fprintf(stderr, "Queue is empty\n");
-        return -1; // Indicate queue is empty
+        return NULL; // Indicate queue is empty
     }
 
     qQueueNode *temp = queue->front;
-    int processId = temp->processId;
+    PCB* pcb = temp->pcb;
     queue->front = queue->front->next;
 
     if (queue->front == NULL)
         queue->rear = NULL;
 
     free(temp);
-    return processId;
+    return pcb;
 }
 
-int qGetFront(const qQueue *queue) {
-    if (queue->front == NULL)
-    {
-        fprintf(stderr, "Attempt to get front from an empty queue\n");
-        return -1; // Indicating the queue is empty
-    }
-    return queue->front->processId;
+PCB* qGetFront(const qQueue *queue) {
+    if (queue->front == NULL) return NULL;
+    return queue->front->pcb;
 }
 
 void qFree(qQueue *queue) {

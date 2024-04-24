@@ -11,7 +11,7 @@
  */
 typedef struct {
     long mtype;         // Message type, must be > 0
-    int processId;      // Process ID
+    int id;             // Unique id not to be confused with actual PID
     int arrivalTime;    // Arrival time of the process
     int runningTime;    // Running time of the process
     int priority;       // Priority of the process

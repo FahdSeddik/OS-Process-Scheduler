@@ -33,14 +33,14 @@ mhMinHeap* mhCreate(int capacity) {
     return minHeap;
 }
 
-void mhInsert(mhMinHeap *minHeap, int processId, int key) {
+void mhInsert(mhMinHeap *minHeap, PCB* pcb, int key) {
     if (minHeap->size == minHeap->capacity) {
         printf("MinHeap overflow\n");
         return;
     }
 
     int i = minHeap->size++;
-    minHeap->elements[i].processId = processId;
+    minHeap->elements[i].pcb = pcb;
     minHeap->elements[i].key = key;
 
     // Heapify up
@@ -50,24 +50,22 @@ void mhInsert(mhMinHeap *minHeap, int processId, int key) {
     }
 }
 
-mhHeapNode mhExtractMin(mhMinHeap *minHeap) {
-    if (minHeap->size <= 0)
-        return (mhHeapNode){-1, -1};
-
+PCB* mhExtractMin(mhMinHeap *minHeap) {
+    if (minHeap->size <= 0) {
+        fprintf(stderr, "MinHeap is empty\n");
+        return NULL;  // Return NULL if heap is empty
+    }
     mhHeapNode root = minHeap->elements[0];
     minHeap->elements[0] = minHeap->elements[minHeap->size - 1];
     minHeap->size--;
     mhMinHeapify(minHeap, 0);
 
-    return root;
+    return root.pcb;
 }
 
-mhHeapNode mhGetTop(const mhMinHeap *minHeap) {
-    if (minHeap->size <= 0) {
-        fprintf(stderr, "MinHeap is empty\n");
-        return (mhHeapNode){-1, -1};  // Return invalid HeapNode if heap is empty
-    }
-    return minHeap->elements[0];
+PCB* mhGetTop(const mhMinHeap *minHeap) {
+    if (minHeap->size <= 0) return NULL;
+    return minHeap->elements[0].pcb;
 }
 
 void mhFree(mhMinHeap * minHeap) {

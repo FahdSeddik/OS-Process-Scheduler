@@ -2,7 +2,7 @@
 #include "pcb.h"
 
 void pcbInit(PCB *pcb, int id, int priority, int arrivalTime, int runningTime) {
-    pcb->id = id;
+    pcb->processId = id;
     pcb->priority = priority;
     pcb->arrivalTime = arrivalTime;
     pcb->runningTime = runningTime;

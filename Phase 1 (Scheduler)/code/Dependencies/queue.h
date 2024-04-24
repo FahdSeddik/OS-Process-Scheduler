@@ -1,12 +1,12 @@
 #ifndef Q_QUEUE_H
 #define Q_QUEUE_H
 #include "bool.h"
-
+#include "pcb.h"
 /**
  * Structure representing a node in the queue.
  */
 typedef struct qQueueNode {
-    int processId;            // Process ID stored in the queue
+    PCB* pcb;            // Process ID stored in the queue
     struct qQueueNode *next; // Pointer to the next node in the queue
 } qQueueNode;
 
@@ -29,23 +29,23 @@ qQueue *qCreate();
 /**
  * Adds a new node with the given process ID to the end of the queue.
  * @param queue Pointer to the queue where the node will be added.
- * @param processId The process ID to store in the new node.
+ * @param pcb Pointer to the process control block (PCB).
  */
-void qEnqueue(qQueue *queue, int processId);
+void qEnqueue(qQueue *queue, PCB* pcb);
 
 /**
  * Removes the node from the front of the queue and returns its process ID.
  * @param queue Pointer to the queue.
- * @return The process ID of the dequeued node, or -1 if the queue is empty.
+ * @return The PCB pointer of the dequeued node, or NULL if the queue is empty.
  */
-int qDequeue(qQueue *queue);
+PCB* qDequeue(qQueue *queue);
 
 /**
  * Retrieves the process ID of the front node of the queue without removing it.
  * @param queue Pointer to the queue.
- * @return The process ID of the front node, or -1 if the queue is empty.
+ * @return The PCB pointer of the front node, or NULL if the queue is empty.
  */
-int qGetFront(const qQueue *queue);
+PCB* qGetFront(const qQueue *queue);
 
 /**
  * Frees all nodes in the queue and the queue structure itself.
