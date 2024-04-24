@@ -7,6 +7,7 @@ int time = 0;
 
 void stopProcess(int signum) {
     shouldCount = false;
+    raise(SIGSTOP);
 }
 
 void continueProcess(int signum) {
