@@ -29,7 +29,8 @@ int main(int agrc, char * argv[])
     signal(SIGUSR1, stopProcess);
     signal(SIGUSR2, continueProcess);
     signal(SIGINT, finish);
-    remainingtime = atoi(argv[1]);
+    fprintf(stderr, "HI here %d\n", getpid());
+    remainingtime = atoi(argv[0]);
     time = getClk();
     while (remainingtime > 0) {
         if(!shouldCount) continue;
@@ -37,7 +38,8 @@ int main(int agrc, char * argv[])
         int curTime = getClk();
         remainingtime -= curTime - time;
         time = curTime;
+        fprintf(stderr, "In Process: %d, rem= %d\n", getpid(), remainingtime);
     }
-    raise(SIGINT);
+    destroyClk(false);
     return 0;
 }

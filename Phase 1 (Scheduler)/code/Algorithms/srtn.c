@@ -26,11 +26,10 @@ void initSRTN(int msgQueueId, int semSyncRcv, Logger* logger) {
     mhMinHeap* minHeap = mhCreate(16);
     SchedulerInfo info;
     schdInit(&info);
-    while (!info.finishGenerate || !mhIsEmpty(minHeap)) {
-        int rcvCode = mhRcvProc(minHeap, msgQueueId, semSyncRcv, false);
-        fprintf(stderr, "At %d\n", getClk());
-        if (rcvCode == -1) info.finishGenerate = true;
-        if (!mhIsEmpty(minHeap)) execSRTN(minHeap, logger);
+    while (!info.finishGenerate || !mhIsEmpty(minHeap) || info.currentlyRunning) {
+        if (mhRcvProc(minHeap, msgQueueId, semSyncRcv, false) == -1) info.finishGenerate = true;
+        execSRTN(minHeap, logger);
+        if(!info.currentlyRunning) loggerCPUWait(logger, 1);
     }
 }
 

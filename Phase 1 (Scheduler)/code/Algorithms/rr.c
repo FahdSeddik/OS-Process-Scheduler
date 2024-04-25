@@ -23,15 +23,13 @@ void execRR(qQueue* queue, int quantum, Logger* logger);
 */
 
 void initRR(int msgQueueId, int semSyncRcv, int quantum, Logger* logger) {
-    int initialCapacity = 16;
     qQueue* queue = qCreate();
     SchedulerInfo info;
     schdInit(&info);
-    while (!info.finishGenerate || !qIsEmpty(queue)) {
-        int rcvCode = qRcvProc(queue, msgQueueId, semSyncRcv);
-        fprintf(stderr, "At %d\n", getClk());
-        if (rcvCode == -1) info.finishGenerate = true;
-        if (!qIsEmpty(queue)) execRR(queue, quantum, logger);
+    while (!info.finishGenerate || !qIsEmpty(queue) || info.currentlyRunning) {
+        if (qRcvProc(queue, msgQueueId, semSyncRcv) == -1) info.finishGenerate = true;
+        execRR(queue, quantum, logger);
+        if(!info.currentlyRunning) loggerCPUWait(logger, 1);
     }
 }
 

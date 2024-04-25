@@ -21,6 +21,8 @@ typedef struct Logger {
     double totalTurnaroundTime;
     double totalWeightedTurnaroundTime;
     int processCount;
+    int size;
+    double* WTAs;
 } Logger;
 
 /**
@@ -44,14 +46,14 @@ Logger* loggerInit(const char* logPath, const char* perfPath);
  * @param ta Turnaround time of the process (only for "finished")
  * @param wta Weighted turnaround time of the process (only for "finished")
  */
-void loggerLogProcessEvent(Logger* logger, int time, int pid, const char* state, int arrival, int total, int remain, int wait, int ta, double wta);
+void loggerLogEvent(Logger* logger, int time, int pid, const char* state, int arrival, int total, int remain, int wait, int ta, double wta);
 
 /**
  * Updates logger cpu waiting time
  * @param logger  Pointer to the logger structure
  * @param waitTime wait time to add for the CPU
  */
-void loggerUpdateCPUWait(Logger* logger, int waitTime);
+void loggerCPUWait(Logger* logger, int waitTime);
 
 /**
  * Updates performance metrics in the logger should be called when process stops
@@ -61,7 +63,7 @@ void loggerUpdateCPUWait(Logger* logger, int waitTime);
  * @param ta Turnaround time to add
  * @param wta Weighted Turnaround Time to add
  */
-void loggerUpdatePerformanceMetrics(Logger* logger, double runtime, double wait, double ta, double wta);
+void loggerUpdateMetrics(Logger* logger, double runtime, double wait, double ta, double wta);
 
 /**
  * Writes the performance data to the performance file

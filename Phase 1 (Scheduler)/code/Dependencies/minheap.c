@@ -73,6 +73,7 @@ PCB* mhExtractMin(mhMinHeap *minHeap) {
     mhHeapNode root = minHeap->elements[0];
     minHeap->elements[0] = minHeap->elements[minHeap->size - 1];
     minHeap->size--;
+    if(minHeap->size == 0) return root.pcb;
     mhMinHeapify(minHeap, 0);
 
     return root.pcb;

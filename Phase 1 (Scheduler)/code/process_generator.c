@@ -26,10 +26,10 @@ int main(int argc, char * argv[])
     semClockAwake = semCreate("./Keys/key1", 1);
     semInitialize(semClockAwake, 0);
     semInitialize(semSyncRcv, 0);
-    pmRunProcess("./build/clk.out", NULL);
+    pmRunProcess("./build/clk.out", NULL, NULL, NULL);
     initClk();
     int sent = 0;
-    int schdPID = pmRunProcess("./build/scheduler.out", userArgv);
+    int schdPID = pmRunProcess("./build/scheduler.out", userArgv, NULL, NULL);
     while (true) {
         semDown(semClockAwake);
         int time = getClk();
@@ -40,7 +40,7 @@ int main(int argc, char * argv[])
             sent++;
             if (sent == processNum) {
                 ProcessMessage dummy;
-                dummy.mtype = 1, dummy.id = -1;
+                dummy.mtype = 1, dummy.id = -1, dummy.priority = -1, dummy.runningTime = 1e9 + 7;
                 mqSend(msgQueueId, dummy);
             }
         }

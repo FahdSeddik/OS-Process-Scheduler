@@ -23,9 +23,9 @@
  * @example
  * char* schedulerArgs[2] = {"RR", "1"};
  * // providing a program path relative to root process path (process_generator.c is always root process)
- * pmRunProcess("./build/scheduler.out", schedulerArgs);
+ * pmRunProcess("./build/scheduler.out", schedulerArgs, NULL, NULL);
  */
-pid_t pmRunProcess(const char* programPath, char * const argv[]);
+pid_t pmRunProcess(const char* programPath, char * const argv[], PCB* pcb, Logger* logger);
 
 /**
  * Preempts the currently running process.
@@ -44,11 +44,10 @@ int pmPreemptProcess(PCB* pcb, Logger* logger);
 int pmContinueProcess(PCB* pcb, Logger* logger);
 
 /**
- * Sends `SIGINT` to `processId`
- * NOTE: This would only be used by root processes such as process_generator to kill scheduler 
- * (probably wont need it anywhere else)
- * @param processId ID of the process to kill.
+ * Terminates a process.
+ * @param pcb A Pointer to the process control block.
+ * @param logger A pointer to the logger.
  */
-int pmKillProcess(pid_t processId);
+int pmKillProcess(PCB* pcb, Logger* logger);
 
 #endif // PROCESS_MANAGER_H

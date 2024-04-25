@@ -2,13 +2,14 @@
 #include "pcb.h"
 
 void pcbInit(PCB *pcb, int id, int priority, int arrivalTime, int runningTime) {
-    pcb->processId = id;
+    pcb->id = id;
+    pcb->processId = -1;
     pcb->priority = priority;
     pcb->arrivalTime = arrivalTime;
     pcb->runningTime = runningTime;
     pcb->remainingTime = runningTime;
     pcb->waitingTime = 0;
-    pcb->lastExecTime = 0;
+    pcb->lastExecTime = arrivalTime;
     pcb->startTime = 0;
     pcb->finishTime = 0;
     pcb->turnaroundTime = 0;

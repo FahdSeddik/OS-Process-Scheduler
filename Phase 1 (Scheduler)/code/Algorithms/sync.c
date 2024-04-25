@@ -2,10 +2,11 @@
 #include "../ProcessManagement/message_queue.h"
 #include "../ProcessManagement/semaphore.h"
 #include <stdio.h>
-
+#include <stdlib.h>
 
 void schdInit(SchedulerInfo* info) {
     info->finishGenerate = false;
+    info->currentlyRunning = NULL;
     // TOOD: add here initialization for any attributes added in sync.h
 }
 
@@ -33,9 +34,9 @@ int mhRcvProc(mhMinHeap* minHeap, int msgQueueId, int semSyncRcv, bool keyIsPrio
         fprintf(stderr, "Rec id: %d\n", message.id);
         // Process generator finished processes
         if(message.id == -1) return -1;
-        PCB pcb;
-        pcbInit(&pcb, message.id, message.priority, message.arrivalTime, message.runningTime);
-        mhInsert(minHeap, &pcb, keyIsPrio ? pcb.priority:pcb.remainingTime);
+        PCB* pcb = (PCB *)malloc(sizeof(PCB));
+        pcbInit(pcb, message.id, message.priority, message.arrivalTime, message.runningTime);
+        mhInsert(minHeap, pcb, keyIsPrio ? pcb->priority:pcb->remainingTime);
     }
     return 0;
 }

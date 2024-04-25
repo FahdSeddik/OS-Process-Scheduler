@@ -14,6 +14,7 @@
 
 typedef struct SchedulerInfo {
     bool finishGenerate;
+    PCB* currentlyRunning;
     // TODO: add common attributes that will be used by all algorithms
     // and add its initialization in schdInit
 } SchedulerInfo;

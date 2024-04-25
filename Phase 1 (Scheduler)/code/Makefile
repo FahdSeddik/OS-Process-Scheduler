@@ -4,11 +4,11 @@ CC = gcc
 DEP = ./Dependencies/minheap.c ./Dependencies/queue.c ./Dependencies/pcb.c
 ALGO = ./Algorithms/hpf.c ./Algorithms/rr.c ./Algorithms/srtn.c ./Algorithms/sync.c
 PMGR = ./ProcessManagement/message_queue.c ./ProcessManagement/process_manager.c ./ProcessManagement/semaphore.c
-LOGG = ./Logging/logger.c
+LOGG = ./Logging/logger.c -lm
 
 # Any used files that are needed in each of those should be here
 scheduler := $(DEP) $(ALGO) $(PMGR) $(LOGG) # This means that when compiling scheduler it will add those c files as pre-compile
-generator := $(PMGR) $(LOGG)
+generator := $(PMGR) $(LOGG) ./Dependencies/pcb.c
 
 # Repeated variables
 build_dir := build
@@ -21,8 +21,8 @@ all: clean build
 build:
 	mkdir -p $(build_dir)
 	$(CC) process_generator.c $(generator) clk_utils.c -o $(build_dir)/process_generator.out
-	$(CC) clk.c clk_utils.c $(PMGR) $(LOGG) -o $(build_dir)/clk.out
-	$(CC) scheduler.c $(scheduler) clk_utils.c -o $(build_dir)/scheduler.out 
+	$(CC) clk.c clk_utils.c ./ProcessManagement/semaphore.c ./Dependencies/pcb.c -o $(build_dir)/clk.out
+	$(CC) scheduler.c $(scheduler) clk_utils.c -o $(build_dir)/scheduler.out
 	$(CC) process.c clk_utils.c -o $(build_dir)/process.out
 	$(CC) test_generator.c -o $(build_dir)/test_generator.out
 
