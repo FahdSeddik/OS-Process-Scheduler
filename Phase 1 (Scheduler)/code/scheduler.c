@@ -51,5 +51,7 @@ int main(int argc, char *argv[]) {
     // cleanup
     destroyClk(true);
     loggerDestroy(logger);
+    // SIGINT process generator to clear resources
+    kill(getppid(), SIGINT);
     return 0;
 }

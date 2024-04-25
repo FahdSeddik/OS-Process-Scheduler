@@ -30,22 +30,22 @@ int main(int argc, char * argv[])
     initClk();
     int sent = 0;
     int schdPID = pmRunProcess(NULL, "./build/scheduler.out", userArgv);
-    while (sent < processNum) {
+    while (true) {
         semDown(semClockAwake);
         int time = getClk();
         printf("PGEN At %d\n", time);
-        while(processes[sent].arrivalTime == time) {
+        while(sent < processNum && processes[sent].arrivalTime == time) {
             printf("\tSENT id: %d\n", processes[sent].id);
             mqSend(msgQueueId, processes[sent]);
             sent++;
+            if (sent == processNum) {
+                ProcessMessage dummy;
+                dummy.mtype = 1, dummy.id = -1;
+                mqSend(msgQueueId, dummy);
+            }
         }
         semUp(semSyncRcv);
     }
-    ProcessMessage finished;
-    finished.id=-1;
-    mqSend(msgQueueId, finished);
-    int status;
-    while (waitpid(schdPID, &status, WNOHANG) == 0);
     raise(SIGINT);
 }
 
