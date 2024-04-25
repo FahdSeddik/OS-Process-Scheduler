@@ -59,8 +59,7 @@ void initHPF(int msgQueueId, int semSyncRcv, Logger* logger) {
     minHeapHPF = mhCreate(16);
     signal(SIGUSR1, catchTerminatedHPF);
     loggerHPF = logger;
-    SchedulerInfo info;
-    infoHPF = &info;
+    infoHPF = malloc(sizeof(SchedulerInfo));
     schdInit(infoHPF);
     while (!infoHPF->finishGenerate || !mhIsEmpty(minHeapHPF) || infoHPF->currentlyRunning) {
         if (mhRcvProc(minHeapHPF, msgQueueId, semSyncRcv, true) == -1) infoHPF->finishGenerate = true;
@@ -68,6 +67,11 @@ void initHPF(int msgQueueId, int semSyncRcv, Logger* logger) {
         if(!infoHPF->currentlyRunning) loggerCPUWait(loggerHPF, 1);
     }
     signal(SIGUSR1, SIG_DFL);
+    mhFree(minHeapHPF);
+    minHeapHPF = NULL;
+    free(infoHPF);
+    infoHPF = NULL;
+    loggerHPF = NULL;
 }
 
 void execHPF() {
@@ -80,10 +84,8 @@ void execHPF() {
 PCB* startNext() {
     PCB* pcb = mhExtractMin(minHeapHPF);
     char remTimeStr[20];
-    char* argv[2];
     sprintf(remTimeStr, "%d", pcb->remainingTime);
-    argv[0] = remTimeStr;
-    argv[1] = NULL;
+    char* argv[] = {remTimeStr, NULL};
     pcb->processId = pmRunProcess("./build/process.out", argv, pcb, loggerHPF);
     pcb->finishTime = getClk() + pcb->runningTime;
     return pcb;
@@ -91,6 +93,7 @@ PCB* startNext() {
 
 void catchTerminatedHPF(int signum) {
     // Process has finished, so terminate and deallocate it
+    if (!infoHPF->currentlyRunning) return; // Must be error
     pmKillProcess(infoHPF->currentlyRunning, loggerHPF);
     free(infoHPF->currentlyRunning);
     infoHPF->currentlyRunning = NULL;

@@ -19,9 +19,9 @@ int qRcvProc(qQueue* queue, int msgQueueId, int semSyncRcv) {
         fprintf(stderr, "Rec id: %d\n", message.id);
         // Process generator finished processes
         if(message.id == -1) return -1;
-        PCB pcb;
-        pcbInit(&pcb, message.id, message.priority, message.arrivalTime, message.runningTime);
-        qEnqueue(queue, &pcb);
+        PCB* pcb = (PCB *)malloc(sizeof(PCB));
+        pcbInit(pcb, message.id, message.priority, message.arrivalTime, message.runningTime);
+        qEnqueue(queue, pcb);
     }
     return 0;
 }

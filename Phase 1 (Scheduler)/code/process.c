@@ -28,7 +28,6 @@ int main(int agrc, char * argv[])
     signal(SIGUSR1, stopProcess);
     signal(SIGUSR2, continueProcess);
     signal(SIGINT, finish);
-    fprintf(stderr, "HI here %d\n", getpid());
     remainingtime = atoi(argv[0]);
     time = getClk();
     while (remainingtime > 0) {
