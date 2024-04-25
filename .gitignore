@@ -1,6 +1,8 @@
 .vscode/
 */build/
 processes.txt
+scheduler.log
+scheduler.perf
 # Prerequisites
 *.d
 

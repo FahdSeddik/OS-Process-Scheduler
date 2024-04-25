@@ -7,6 +7,7 @@
 
 #include "headers.h"
 #include "clk_utils.h"
+#include "ProcessManagement/semaphore.h"
 
 int shmid;
 
@@ -38,9 +39,11 @@ int main(int argc, char * argv[])
         exit(-1);
     }
     *shmaddr = clk; /* initialize shared memory */
+    int semClockAwake = semCreate("./Keys/key1", 1);
     while (1)
     {
         sleep(1);
         (*shmaddr)++;
+        semUp(semClockAwake);
     }
 }

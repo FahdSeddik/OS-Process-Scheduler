@@ -5,37 +5,16 @@
 #include "ProcessManagement/process_manager.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 void clearResources(int);
 void promptUser(char ***argv, int *argc);
 void readInput(ProcessMessage **processes, int *processNum);
-int msgQueueId,semSyncRcv;
+int msgQueueId, semSyncRcv, semClockAwake;
 ProcessMessage* processes;
 int main(int argc, char * argv[])
 {
     signal(SIGINT, clearResources);
-    // TODO Initialization
-    // 1. Read the input files.
-    // 2. Ask the user for the chosen scheduling algorithm and its parameters, if there are any.
-    // 3. Initiate and create the scheduler and clock processes.
-    // 4. Use this function after creating the clock process to initialize clock
-    initClk();
-    // TODO Generation Main Loop
-    // 5. Create a data structure for processes and provide it with its parameters.
-    // 6. Send the information to the scheduler at the appropriate time.
-    // 7. Clear clock resources
-
-    // Pseudo code: (could be modified)
-    // 1. Ask user which algorithm do they want using a function (HPF, SRTN, RR with quantum)
-    // 2. Read Input file using a function
-    // 3. Create messageQueue using mqCreate() // sync with who wrote the scheduler to know params
-    // 4. Create a semaphore to be used in synchronization using semCreate() // sync with who wrote the scheduler to know params
-    // 5. Initiate scheduler using pmRunProcess sending it params read from user input (algorithm, quantum (if applicable))
-    // 6. Call program loop function that would do the following:
-    //      1. Have a while loop with a condition that it still didnt finish all processes
-    //      2. Should down the semaphore to ensure that if you have something to send in message queue, the scheduler will wait for it (scheduler has up)
-    //      3. Should send *all* processes that arrive at the current clock using the message queue mqSend()
-    //      4. Should wait until next clock using one-line busy wait while(time == getClk());
     char** userArgv;
     int userArgc;
     promptUser(&userArgv, &userArgc);
@@ -44,18 +23,23 @@ int main(int argc, char * argv[])
     readInput(&processes, &processNum);
     msgQueueId = mqCreate("./Keys/key1", 0);
     semSyncRcv = semCreate("./Keys/key1", 0);
+    semClockAwake = semCreate("./Keys/key1", 1);
+    semInitialize(semClockAwake, 0);
     semInitialize(semSyncRcv, 0);
-    int time = getClk();
+    pmRunProcess(NULL, "./build/clk.out", NULL);
+    initClk();
     int sent = 0;
     int schdPID = pmRunProcess(NULL, "./build/scheduler.out", userArgv);
     while (sent < processNum) {
+        semDown(semClockAwake);
+        int time = getClk();
+        printf("PGEN At %d\n", time);
         while(processes[sent].arrivalTime == time) {
+            printf("\tSENT id: %d\n", processes[sent].id);
             mqSend(msgQueueId, processes[sent]);
             sent++;
         }
         semUp(semSyncRcv);
-        while(time == getClk());
-        time = getClk();
     }
     ProcessMessage finished;
     finished.id=-1;
@@ -93,10 +77,12 @@ void promptUser(char ***argv, int *argc) {
             *argc = 2;
             *argv = (char **)malloc((*argc + 1) * sizeof(char *));
             (*argv)[0] = "RR";
-            (*argv)[2] = NULL;
+            char *quantumStr = malloc(20); // Allocate memory for the quantum string
             printf("Enter the time quantum for Round Robin: ");
             scanf("%d", &choice);
-            sprintf((*argv)[1], "%d", choice); // Convert integer to string
+            sprintf(quantumStr, "%d", choice); // Convert integer to string
+            (*argv)[1] = quantumStr; // Assign the string to the arguments array
+            (*argv)[2] = NULL;
             break;
         default:
             printf("Invalid choice. Please choose a number between 1 and 3.\n");
@@ -110,7 +96,7 @@ void readInput(ProcessMessage **processes, int *processNum) {
 
     if (!file) {
         perror("Unable to open the file");
-        exit(EXIT_FAILURE);
+        raise(SIGINT);
     }
 
     // Skipping the header line
@@ -118,7 +104,7 @@ void readInput(ProcessMessage **processes, int *processNum) {
     if (fgets(buffer, sizeof(buffer), file) == NULL) {
         fclose(file);
         perror("Failed to read the header line");
-        exit(EXIT_FAILURE);
+        raise(SIGINT);
     }
 
     ProcessMessage temp;
@@ -129,7 +115,7 @@ void readInput(ProcessMessage **processes, int *processNum) {
     if (*processes == NULL) {
         perror("Failed to allocate memory for processes");
         fclose(file);
-        exit(EXIT_FAILURE);
+        raise(SIGINT);
     }
 
     while (fscanf(file, "%d %d %d %d", &temp.id, &temp.arrivalTime, &temp.runningTime, &temp.priority) == 4) {
@@ -139,7 +125,7 @@ void readInput(ProcessMessage **processes, int *processNum) {
             if (*processes == NULL) {
                 perror("Failed to reallocate memory for processes");
                 fclose(file);
-                exit(EXIT_FAILURE);
+                raise(SIGINT);
             }
         }
         (*processes)[count] = temp;
@@ -152,13 +138,12 @@ void readInput(ProcessMessage **processes, int *processNum) {
 }
 
 
-void clearResources(int signum)
-{
+void clearResources(int signum) {
     //TODO Clears all resources in case of interruption
     semDelete(semSyncRcv);
     mqDelete(msgQueueId);
+    destroyClk(true);
     free(processes);
     signal(SIGINT, SIG_DFL);
-    destroyClk(true);
-    raise(SIGINT);
+    kill(0, SIGINT);
 }

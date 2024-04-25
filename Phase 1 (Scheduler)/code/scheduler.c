@@ -18,8 +18,7 @@
 
 int main(int argc, char *argv[]) {
     initClk();
-
-    if (argc < 2) {
+    if (argc < 1) {
         perror("Invalid number of arguments");
         exit(-1);
     }
@@ -28,7 +27,7 @@ int main(int argc, char *argv[]) {
     int msgQueueId = mqCreate("./Keys/key1", 0);
     int semSyncRcv = semCreate("./Keys/key1", 0);
 
-    char *algorithm = argv[1];
+    char *algorithm = argv[0];
     int quantum = 0;
 
     if (strcmp(algorithm, "HPF") == 0) {
@@ -36,11 +35,11 @@ int main(int argc, char *argv[]) {
     } else if (strcmp(algorithm, "SRTN") == 0) {
         initSRTN(msgQueueId, semSyncRcv, logger);
     } else if (strcmp(algorithm, "RR") == 0) {
-        if (argc < 3) {
+        if (argc < 2) {
             perror("Invalid number of arguments");
             exit(-1);
         }
-        quantum = atoi(argv[2]);
+        quantum = atoi(argv[1]);
         initRR(msgQueueId, semSyncRcv, quantum, logger);
     } else {
         perror("Invalid algorithm");

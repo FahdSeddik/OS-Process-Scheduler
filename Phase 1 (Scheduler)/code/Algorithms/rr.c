@@ -27,13 +27,11 @@ void initRR(int msgQueueId, int semSyncRcv, int quantum, Logger* logger) {
     qQueue* queue = qCreate();
     SchedulerInfo info;
     schdInit(&info);
-    int time = getClk();
     while (!info.finishGenerate || !qIsEmpty(queue)) {
         int rcvCode = qRcvProc(queue, msgQueueId, semSyncRcv);
+        fprintf(stderr, "At %d\n", getClk());
         if (rcvCode == -1) info.finishGenerate = true;
         if (!qIsEmpty(queue)) execRR(queue, quantum, logger);
-        while(time == getClk());
-        time = getClk();
     }
 }
 

@@ -1,6 +1,7 @@
 #include "sync.h"
 #include "../ProcessManagement/message_queue.h"
 #include "../ProcessManagement/semaphore.h"
+#include <stdio.h>
 
 
 void schdInit(SchedulerInfo* info) {
@@ -11,12 +12,14 @@ void schdInit(SchedulerInfo* info) {
 
 int qRcvProc(qQueue* queue, int msgQueueId, int semSyncRcv) {
     semDown(semSyncRcv);
-    ProcessMessage* message;
-    while(mqReceiveNonBlocking(msgQueueId, message) == 1) {
+    ProcessMessage message;
+    message.mtype = MESSAGE_MTYPE;
+    while(mqReceiveNonBlocking(msgQueueId, &message) == 1) {
+        fprintf(stderr, "Rec id: %d\n", message.id);
         // Process generator finished processes
-        if(message->id == -1) return -1;
+        if(message.id == -1) return -1;
         PCB pcb;
-        pcbInit(&pcb, message->id, message->priority, message->arrivalTime, message->runningTime);
+        pcbInit(&pcb, message.id, message.priority, message.arrivalTime, message.runningTime);
         qEnqueue(queue, &pcb);
     }
     return 0;
@@ -24,12 +27,14 @@ int qRcvProc(qQueue* queue, int msgQueueId, int semSyncRcv) {
 
 int mhRcvProc(mhMinHeap* minHeap, int msgQueueId, int semSyncRcv, bool keyIsPrio) {
     semDown(semSyncRcv);
-    ProcessMessage* message;
-    while(mqReceiveNonBlocking(msgQueueId, message) == 1) {
+    ProcessMessage message;
+    message.mtype = MESSAGE_MTYPE;
+    while(mqReceiveNonBlocking(msgQueueId, &message) == 1) {
+        fprintf(stderr, "Rec id: %d\n", message.id);
         // Process generator finished processes
-        if(message->id == -1) return -1;
+        if(message.id == -1) return -1;
         PCB pcb;
-        pcbInit(&pcb, message->id, message->priority, message->arrivalTime, message->runningTime);
+        pcbInit(&pcb, message.id, message.priority, message.arrivalTime, message.runningTime);
         mhInsert(minHeap, &pcb, keyIsPrio ? pcb.priority:pcb.remainingTime);
     }
     return 0;
