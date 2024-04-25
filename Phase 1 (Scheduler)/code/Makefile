@@ -8,7 +8,7 @@ LOGG = ./Logging/logger.c
 
 # Any used files that are needed in each of those should be here
 scheduler := $(DEP) $(ALGO) $(PMGR) $(LOGG) # This means that when compiling scheduler it will add those c files as pre-compile
-generator := $(PMGR)
+generator := $(PMGR) $(LOGG)
 
 # Repeated variables
 build_dir := build
@@ -21,7 +21,7 @@ all: clean build
 build:
 	mkdir -p $(build_dir)
 	$(CC) process_generator.c $(generator) clk_utils.c -o $(build_dir)/process_generator.out
-	$(CC) clk.c clk_utils.c $(PMGR) -o $(build_dir)/clk.out
+	$(CC) clk.c clk_utils.c $(PMGR) $(LOGG) -o $(build_dir)/clk.out
 	$(CC) scheduler.c $(scheduler) clk_utils.c -o $(build_dir)/scheduler.out 
 	$(CC) process.c clk_utils.c -o $(build_dir)/process.out
 	$(CC) test_generator.c -o $(build_dir)/test_generator.out

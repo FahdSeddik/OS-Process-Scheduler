@@ -16,14 +16,24 @@
 #include "ProcessManagement/semaphore.h"
 #include "clk_utils.h"
 
+
+Logger* logger = NULL;
+void terminate(int signum) {
+    destroyClk(true);
+    if(logger) loggerDestroy(logger);
+    signal(SIGINT, SIG_DFL);
+    kill(getpgrp(), SIGINT);
+    raise(SIGINT);
+}
+
 int main(int argc, char *argv[]) {
     initClk();
     if (argc < 1) {
         perror("Invalid number of arguments");
         exit(-1);
     }
-
-    Logger* logger = loggerInit("./logs/scheduler.log", "./logs/scheduler.perf");
+    signal(SIGINT, terminate);
+    logger = loggerInit("./logs/scheduler.log", "./logs/scheduler.perf");
     int msgQueueId = mqCreate("./Keys/key1", 0);
     int semSyncRcv = semCreate("./Keys/key1", 0);
 
