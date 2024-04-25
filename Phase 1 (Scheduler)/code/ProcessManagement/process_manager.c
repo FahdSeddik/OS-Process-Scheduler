@@ -1,10 +1,9 @@
 #include "process_manager.h"
 #include <signal.h>
 #include <stdio.h>
+#include "../clk_utils.h"
 
-pid_t pmRunProcess(Logger* logger, const char* programPath, char * const argv[]) {
-    // TODO: perform logging here
-    // Hint: you may need to adjust parameters/include extra files
+pid_t pmRunProcess(const char* programPath, char * const argv[]) {
 
     pid_t pid = fork();
 
@@ -24,17 +23,15 @@ pid_t pmRunProcess(Logger* logger, const char* programPath, char * const argv[])
     return pid;
 }
 
-int pmPreemptProcess(pid_t processId, Logger* logger) {
-    // TODO: perform logging here
-    // Hint: you may need to adjust parameters/include extra files
-    return kill(processId, PREEMPT);
+int pmPreemptProcess(PCB* pcb, Logger* logger) {
+    loggerLogProcessEvent(logger, getClk(), pcb->processId, "stopped", pcb->arrivalTime, pcb->runningTime, pcb->remainingTime, pcb->waitingTime, 0, 0);
+    return kill(pcb->processId, PREEMPT);
 }
 
-int pmContinueProcess(pid_t processId, Logger* logger) {
-    // TODO: perform logging here
-    // Hint: you may need to adjust parameters/include extra files
-    kill(processId, SIGCONT);
-    return kill(processId, CONTINUE);
+int pmContinueProcess(PCB* pcb, Logger* logger) {
+    loggerLogProcessEvent(logger, getClk(), pcb->processId, "resumed", pcb->arrivalTime, pcb->runningTime, pcb->remainingTime, pcb->waitingTime, 0, 0);
+    kill(pcb->processId, SIGCONT);
+    return kill(pcb->processId, CONTINUE);
 }
 
 int pmKillProcess(pid_t processId) {

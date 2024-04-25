@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include "../Logging/logger.h"
+#include "../Dependencies/pcb.h"
 
 // TODO: All methods here should take a logger pointer that should be created in scheduler
 // and passed down to the algorithm function ex: HPF(messageQueueId, loggerPtr)
@@ -15,7 +16,6 @@
 
 /**
  * Runs a new process using fork and exec.
- * @param logger A pointer to the logger.
  * @param programPath A path to the compiled binary for the program.
  * @param argv Array of arguments to be passed.
  * @return `pid_t` The PID of the forked process.
@@ -23,25 +23,25 @@
  * @example
  * char* schedulerArgs[2] = {"RR", "1"};
  * // providing a program path relative to root process path (process_generator.c is always root process)
- * pmRunProcess(NULL, "./build/scheduler.out", schedulerArgs);
+ * pmRunProcess("./build/scheduler.out", schedulerArgs);
  */
-pid_t pmRunProcess(Logger* logger, const char* programPath, char * const argv[]);
+pid_t pmRunProcess(const char* programPath, char * const argv[]);
 
 /**
  * Preempts the currently running process.
- * @param processId ID of the process to preempt.
+ * @param pcb A Pointer to the process control block.
  * @param logger A pointer to the logger.
  * @return `int` 0 on success, -1 on error.
  */
-int pmPreemptProcess(pid_t processId, Logger* logger);
+int pmPreemptProcess(PCB* pcb, Logger* logger);
 
 /**
  * Continues a stopped process.
- * @param processId ID of the process to continue.
+ * @param pcb A Pointer to the process control block.
  * @param logger A pointer to the logger.
  * @return `int` 0 on success, -1 on error.
  */
-int pmContinueProcess(pid_t processId, Logger* logger);
+int pmContinueProcess(PCB* pcb, Logger* logger);
 
 /**
  * Sends `SIGINT` to `processId`

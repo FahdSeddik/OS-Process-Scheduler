@@ -26,10 +26,10 @@ int main(int argc, char * argv[])
     semClockAwake = semCreate("./Keys/key1", 1);
     semInitialize(semClockAwake, 0);
     semInitialize(semSyncRcv, 0);
-    pmRunProcess(NULL, "./build/clk.out", NULL);
+    pmRunProcess("./build/clk.out", NULL);
     initClk();
     int sent = 0;
-    int schdPID = pmRunProcess(NULL, "./build/scheduler.out", userArgv);
+    int schdPID = pmRunProcess("./build/scheduler.out", userArgv);
     while (true) {
         semDown(semClockAwake);
         int time = getClk();
@@ -141,6 +141,7 @@ void readInput(ProcessMessage **processes, int *processNum) {
 void clearResources(int signum) {
     //TODO Clears all resources in case of interruption
     semDelete(semSyncRcv);
+    semDelete(semClockAwake);
     mqDelete(msgQueueId);
     destroyClk(true);
     free(processes);
