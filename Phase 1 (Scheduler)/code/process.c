@@ -16,8 +16,7 @@ void continueProcess(int signum) {
 }
 
 void finish(int signum) {
-    // TODO: some logic m4 3aref lw hane7tag wala la2
-    
+    kill(getppid(), SIGUSR1);
     signal(SIGINT, SIG_DFL);
     destroyClk(false);
     raise(SIGINT);
@@ -40,6 +39,6 @@ int main(int agrc, char * argv[])
         time = curTime;
         fprintf(stderr, "In Process: %d, rem= %d\n", getpid(), remainingtime);
     }
-    destroyClk(false);
+    raise(SIGINT);
     return 0;
 }
