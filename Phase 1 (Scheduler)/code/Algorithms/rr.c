@@ -41,8 +41,6 @@ Logger* loggerRR = NULL;
 
 
 void initRR(int msgQueueId, int semSyncRcv, int quantum, Logger* logger) {
-    fprinf(stderr, "RR NOT WORKING\n");
-    raise(SIGINT);
     queueRR = qCreate();
     signal(SIGUSR1, catchTerminatedRR);
     infoRR = malloc(sizeof(SchedulerInfo));
@@ -75,17 +73,21 @@ void execRR(int quantum) {
         pmRunProcess("./build/process.out", argv, currentProcess, loggerRR);
         infoRR->currentlyRunning = currentProcess;
     }
-    if (!currentProcess || qIsEmpty(queueRR)) return;
-    // Decrement the quantum remaining for the current process
-    int time = getClk();
-    if (time - currentProcess->lastExecTime >= quantum) {
-        // Time slice is over, switch to next process
-        PCB* nextProcess = qDequeue(queueRR);
-        pmPreemptProcess(currentProcess, loggerRR);
-        qEnqueue(queueRR, currentProcess);
+    if (!currentProcess) return;
+    if (getClk() - currentProcess->lastExecTime < quantum) return;
+    // Time slice is over, switch to next process
+    pmPreemptProcess(currentProcess, loggerRR);
+    qEnqueue(queueRR, currentProcess);
+    PCB* nextProcess = qDequeue(queueRR);
+    if (nextProcess->processId == -1) {
+        char remTimeStr[20];
+        sprintf(remTimeStr, "%d", nextProcess->remainingTime);
+        char* argv[] = {remTimeStr, NULL};
+        pmRunProcess("./build/process.out", argv, nextProcess, loggerRR);
+    } else {
         pmContinueProcess(nextProcess, loggerRR);
-        infoRR->currentlyRunning = nextProcess;
     }
+    infoRR->currentlyRunning = nextProcess;
 }
 
 void catchTerminatedRR(int signum) {

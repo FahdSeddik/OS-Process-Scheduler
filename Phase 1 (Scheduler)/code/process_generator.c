@@ -40,7 +40,7 @@ int main(int argc, char * argv[])
             sent++;
             if (sent == processNum) {
                 ProcessMessage dummy;
-                dummy.mtype = 1, dummy.id = -1, dummy.priority = -1, dummy.runningTime = 1e9 + 7;
+                dummy.mtype = 1, dummy.id = -1;
                 mqSend(msgQueueId, dummy);
             }
         }
