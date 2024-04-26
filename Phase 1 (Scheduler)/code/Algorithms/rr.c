@@ -35,22 +35,34 @@ void execRR(int quantum);
  */
 void catchTerminatedRR(int signum);
 
+/**
+ * Either runs the process or continues it depending on the passed pcb.
+ * @param pcb A pointer to the pcb.
+ */
+void startNextRR(PCB* pcb);
+
+
 qQueue* queueRR = NULL;
 SchedulerInfo* infoRR = NULL;
 Logger* loggerRR = NULL;
+int semSyncTerminateRR;
 
-
-void initRR(int msgQueueId, int semSyncRcv, int quantum, Logger* logger) {
+void initRR(int msgQueueId, int semSyncRcv, int semSyncTerminate, int quantum, Logger* logger) {
     queueRR = qCreate();
     signal(SIGUSR1, catchTerminatedRR);
     infoRR = malloc(sizeof(SchedulerInfo));
     schdInit(infoRR);
     loggerRR = logger;
+    semSyncTerminateRR = semSyncTerminate;
     while (!infoRR->finishGenerate || !qIsEmpty(queueRR) || infoRR->currentlyRunning) {
-        if (infoRR->currentlyRunning) infoRR->currentlyRunning->remainingTime--;
+        PCB* currentProcess = infoRR->currentlyRunning;
+        if (currentProcess) {
+            currentProcess->remainingTime--;
+            if (currentProcess->remainingTime == 0) semDown(semSyncTerminateRR);
+        }
         if (qRcvProc(queueRR, msgQueueId, semSyncRcv) == -1) infoRR->finishGenerate = true;
         execRR(quantum);
-        if(!infoRR->currentlyRunning) loggerCPUWait(loggerRR, 1);
+        if(!currentProcess) loggerCPUWait(loggerRR, 1);
     }
     signal(SIGUSR1, SIG_DFL);
     qFree(queueRR);
@@ -61,17 +73,11 @@ void initRR(int msgQueueId, int semSyncRcv, int quantum, Logger* logger) {
 }
 
 void execRR(int quantum) {
-    // TODO: implement this function
-    // NOTE: you may want to change its interface
     PCB* currentProcess = infoRR->currentlyRunning;
     // If there is no current process running, get one from the queue
     if (!currentProcess && !qIsEmpty(queueRR)) {
         currentProcess = qDequeue(queueRR);
-        char remTimeStr[20];
-        sprintf(remTimeStr, "%d", currentProcess->remainingTime);
-        char* argv[] = {remTimeStr, NULL};
-        pmRunProcess("./build/process.out", argv, currentProcess, loggerRR);
-        infoRR->currentlyRunning = currentProcess;
+        startNextRR(currentProcess);
     }
     if (!currentProcess) return;
     if (getClk() - currentProcess->lastExecTime < quantum) return;
@@ -79,19 +85,22 @@ void execRR(int quantum) {
     pmPreemptProcess(currentProcess, loggerRR);
     qEnqueue(queueRR, currentProcess);
     PCB* nextProcess = qDequeue(queueRR);
-    if (nextProcess->processId == -1) {
+    startNextRR(nextProcess);
+}
+
+void startNextRR(PCB* pcb) {
+    if (pcb->processId == -1) {
         char remTimeStr[20];
-        sprintf(remTimeStr, "%d", nextProcess->remainingTime);
+        sprintf(remTimeStr, "%d", pcb->remainingTime);
         char* argv[] = {remTimeStr, NULL};
-        pmRunProcess("./build/process.out", argv, nextProcess, loggerRR);
+        pmRunProcess("./build/process.out", argv, pcb, loggerRR);
     } else {
-        pmContinueProcess(nextProcess, loggerRR);
+        pmContinueProcess(pcb, loggerRR);
     }
-    infoRR->currentlyRunning = nextProcess;
+    infoRR->currentlyRunning = pcb;
 }
 
 void catchTerminatedRR(int signum) {
-    // TODO: implement logic when process terminates
     if (!infoRR->currentlyRunning) return; // Must be error
     pmKillProcess(infoRR->currentlyRunning, loggerRR);
     free(infoRR->currentlyRunning);

@@ -18,9 +18,11 @@
 
 
 Logger* logger = NULL;
+int semSyncTerminate;
 void terminate(int signum) {
     destroyClk(true);
     if(logger) loggerDestroy(logger);
+    semDelete(semSyncTerminate);
     signal(SIGINT, SIG_DFL);
     kill(getpgrp(), SIGINT);
     raise(SIGINT);
@@ -36,21 +38,22 @@ int main(int argc, char *argv[]) {
     logger = loggerInit("./logs/scheduler.log", "./logs/scheduler.perf");
     int msgQueueId = mqCreate("./Keys/key1", 0);
     int semSyncRcv = semCreate("./Keys/key1", 0);
-
+    semSyncTerminate = semCreate("./Keys/key1", 2);
+    semInitialize(semSyncTerminate, 0);
     char *algorithm = argv[0];
     int quantum = 0;
 
     if (strcmp(algorithm, "HPF") == 0) {
-        initHPF(msgQueueId, semSyncRcv, logger);
+        initHPF(msgQueueId, semSyncRcv, semSyncTerminate, logger);
     } else if (strcmp(algorithm, "SRTN") == 0) {
-        initSRTN(msgQueueId, semSyncRcv, logger);
+        initSRTN(msgQueueId, semSyncRcv, semSyncTerminate, logger);
     } else if (strcmp(algorithm, "RR") == 0) {
         if (argc < 2) {
             perror("Invalid number of arguments");
             exit(-1);
         }
         quantum = atoi(argv[1]);
-        initRR(msgQueueId, semSyncRcv, quantum, logger);
+        initRR(msgQueueId, semSyncRcv, semSyncTerminate, quantum, logger);
     } else {
         perror("Invalid algorithm");
         exit(-1);
@@ -61,6 +64,7 @@ int main(int argc, char *argv[]) {
     // cleanup
     destroyClk(true);
     loggerDestroy(logger);
+    semDelete(semSyncTerminate);
     // SIGINT process generator to clear resources
     kill(getppid(), SIGINT);
     return 0;

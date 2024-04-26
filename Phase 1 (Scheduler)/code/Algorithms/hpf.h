@@ -11,9 +11,10 @@
  * Performs Highest Priority First (HPF) scheduling algorithm
  * @param msgQueueId An id for the message queue.
  * @param semSyncRcv An id for the semaphore to be used for guarantee wait for process gen.
+ * @param semSyncTerminate An id for the semaphore that ensures termination signals are synced.
  * @param logger A pointer to the logger.
  */
-void initHPF(int msgQueueId, int semSyncRcv, Logger* logger);
+void initHPF(int msgQueueId, int semSyncRcv, int semSyncTerminate, Logger* logger);
 
 
 

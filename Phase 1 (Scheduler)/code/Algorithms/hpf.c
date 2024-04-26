@@ -35,7 +35,7 @@ void execHPF();
  *              all the necessary information about the process's runtime state and
  *              scheduling properties.
  */
-PCB* startNext();
+PCB* startNextHPF();
 
 /**
  * Handles the `SIGUSR1` signal triggered when a process terminates.
@@ -52,16 +52,22 @@ void catchTerminatedHPF(int signum);
 SchedulerInfo* infoHPF = NULL;
 Logger* loggerHPF = NULL;
 mhMinHeap* minHeapHPF = NULL;
+int semSyncTerminateHPF;
 
-
-void initHPF(int msgQueueId, int semSyncRcv, Logger* logger) {
+void initHPF(int msgQueueId, int semSyncRcv, int semSyncTerminate, Logger* logger) {
     int initialCapacity = 16;
     minHeapHPF = mhCreate(16);
     signal(SIGUSR1, catchTerminatedHPF);
     loggerHPF = logger;
     infoHPF = malloc(sizeof(SchedulerInfo));
+    semSyncTerminateHPF = semSyncTerminate;
     schdInit(infoHPF);
     while (!infoHPF->finishGenerate || !mhIsEmpty(minHeapHPF) || infoHPF->currentlyRunning) {
+        PCB* currentProcess = infoHPF->currentlyRunning;
+        if (currentProcess) {
+            currentProcess->remainingTime--;
+            if (currentProcess->remainingTime == 0) semDown(semSyncTerminateHPF);
+        }
         if (mhRcvProc(minHeapHPF, msgQueueId, semSyncRcv, true) == -1) infoHPF->finishGenerate = true;
         execHPF();
         if(!infoHPF->currentlyRunning) loggerCPUWait(loggerHPF, 1);
@@ -78,10 +84,10 @@ void execHPF() {
     if (infoHPF->currentlyRunning) return;
     // At this point, either no process was running or the previous process has just been terminated.
     // If the heap is not empty, start the next process.
-    if (!mhIsEmpty(minHeapHPF)) infoHPF->currentlyRunning = startNext(minHeapHPF, loggerHPF);
+    if (!mhIsEmpty(minHeapHPF)) infoHPF->currentlyRunning = startNextHPF(minHeapHPF, loggerHPF);
 }
 
-PCB* startNext() {
+PCB* startNextHPF() {
     PCB* pcb = mhExtractMin(minHeapHPF);
     char remTimeStr[20];
     sprintf(remTimeStr, "%d", pcb->remainingTime);

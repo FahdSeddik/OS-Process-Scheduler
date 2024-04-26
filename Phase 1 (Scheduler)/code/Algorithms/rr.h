@@ -10,10 +10,11 @@
  * 
  * @param msgQueueId An id for the message queue.
  * @param semSyncRcv An id for the semaphore to be used for guarantee wait for process gen.
+ * @param semSyncTerminate An id for the semaphore that ensures termination signals are synced.
  * @param quantum A value for the quantum used in RR algorithm.
  * @param logger A pointer to the logger.
  */
-void initRR(int msgQueueId, int semSyncRcv, int quantum, Logger* logger);
+void initRR(int msgQueueId, int semSyncRcv, int semSyncTerminate, int quantum, Logger* logger);
 
 
 #endif // RR_H

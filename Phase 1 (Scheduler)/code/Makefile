@@ -23,7 +23,7 @@ build:
 	$(CC) process_generator.c $(generator) clk_utils.c -o $(build_dir)/process_generator.out
 	$(CC) clk.c clk_utils.c ./ProcessManagement/semaphore.c ./Dependencies/pcb.c -o $(build_dir)/clk.out
 	$(CC) scheduler.c $(scheduler) clk_utils.c -o $(build_dir)/scheduler.out
-	$(CC) process.c clk_utils.c -o $(build_dir)/process.out
+	$(CC) process.c clk_utils.c ./ProcessManagement/semaphore.c -o $(build_dir)/process.out
 	$(CC) test_generator.c -o $(build_dir)/test_generator.out
 
 clean:

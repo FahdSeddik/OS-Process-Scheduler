@@ -36,12 +36,13 @@ pid_t pmRunProcess(const char* programPath, char * const argv[], PCB* pcb, Logge
 }
 
 int pmPreemptProcess(PCB* pcb, Logger* logger) {
+    int result = kill(pcb->processId, PREEMPT);
     fprintf(stderr, "Child pid= %d, preempted\n", pcb->processId);
     int time = getClk();
     pcbCalculateWaitingTime(pcb, time);
     pcbUpdateProcessState(pcb, READY);
     loggerLogEvent(logger, time, pcb->id, "stopped", pcb->arrivalTime, pcb->runningTime, pcb->remainingTime, pcb->waitingTime, 0, 0);
-    return kill(pcb->processId, PREEMPT);
+    return result;
 }
 
 int pmContinueProcess(PCB* pcb, Logger* logger) {

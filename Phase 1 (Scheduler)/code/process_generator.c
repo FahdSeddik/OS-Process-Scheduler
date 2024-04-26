@@ -143,8 +143,7 @@ void clearResources(int signum) {
     semDelete(semSyncRcv);
     semDelete(semClockAwake);
     mqDelete(msgQueueId);
-    destroyClk(true);
     free(processes);
     signal(SIGINT, SIG_DFL);
-    kill(0, SIGINT);
+    destroyClk(true);
 }

@@ -37,17 +37,22 @@ void catchTerminatedSRTN(int signum);
 SchedulerInfo* infoSRTN = NULL;
 Logger* loggerSRTN = NULL;
 mhMinHeap* minHeapSRTN = NULL;
+int semSyncTerminateSRTN;
 
-
-void initSRTN(int msgQueueId, int semSyncRcv, Logger* logger) {
+void initSRTN(int msgQueueId, int semSyncRcv, int semSyncTerminate, Logger* logger) {
     int initialCapacity = 16;
     minHeapSRTN = mhCreate(16);
     signal(SIGUSR1, catchTerminatedSRTN);
     loggerSRTN = logger;
     infoSRTN = malloc(sizeof(SchedulerInfo));
+    semSyncTerminateSRTN = semSyncTerminate;
     schdInit(infoSRTN);
     while (!infoSRTN->finishGenerate || !mhIsEmpty(minHeapSRTN) || infoSRTN->currentlyRunning) {
-        if(infoSRTN->currentlyRunning) infoSRTN->currentlyRunning->remainingTime--;
+        PCB* currentProcess = infoSRTN->currentlyRunning;
+        if (currentProcess) {
+            currentProcess->remainingTime--;
+            if (currentProcess->remainingTime == 0) semDown(semSyncTerminateSRTN);
+        }
         if (mhRcvProc(minHeapSRTN, msgQueueId, semSyncRcv, false) == -1) infoSRTN->finishGenerate = true;
         execSRTN();
         if(!infoSRTN->currentlyRunning) loggerCPUWait(loggerSRTN, 1);
@@ -61,8 +66,6 @@ void initSRTN(int msgQueueId, int semSyncRcv, Logger* logger) {
 }
 
 void execSRTN() {
-    // TODO: implement this function
-    // NOTE: you may want to change its interface
     PCB* currProcess = infoSRTN->currentlyRunning;
     PCB* nextProcess = NULL;
     // Check if there are processes waiting and if the CPU is idle or there's a need to preempt
@@ -97,7 +100,6 @@ void execSRTN() {
 }
 
 void catchTerminatedSRTN(int signum) {
-    // TODO: implement logic when process terminates
     if (!infoSRTN->currentlyRunning) return; // Must be error
     pmKillProcess(infoSRTN->currentlyRunning, loggerSRTN);
     free(infoSRTN->currentlyRunning);
