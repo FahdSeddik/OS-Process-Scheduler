@@ -8,19 +8,14 @@
 #include <unistd.h>
 
 void clearResources(int);
-void promptUser(char ***argv, int *argc);
-void readInput(ProcessMessage **processes, int *processNum);
+void readInput(ProcessMessage **processes, int *processNum, const char* filename);
 int msgQueueId, semSyncRcv, semClockAwake;
 ProcessMessage* processes;
-int main(int argc, char * argv[])
-{
+int main(int argc, char * argv[]) {
     signal(SIGINT, clearResources);
-    char** userArgv;
-    int userArgc;
-    promptUser(&userArgv, &userArgc);
     processes = NULL;
     int processNum = 0;
-    readInput(&processes, &processNum);
+    readInput(&processes, &processNum, argv[1]);
     msgQueueId = mqCreate("./Keys/key1", 0);
     semSyncRcv = semCreate("./Keys/key1", 0);
     semClockAwake = semCreate("./Keys/key1", 1);
@@ -29,12 +24,19 @@ int main(int argc, char * argv[])
     pmRunProcess("./build/clk.out", NULL, NULL, NULL);
     initClk();
     int sent = 0;
-    int schdPID = pmRunProcess("./build/scheduler.out", userArgv, NULL, NULL);
+    char** schedArgv = (char **)malloc((argc - 1) * sizeof(char *));;
+    schedArgv[0] = argv[2];
+    schedArgv[1] = NULL;
+    if (argc > 3) {
+        schedArgv[1] = argv[3];
+        schedArgv[2] = NULL;
+    }
+    int schdPID = pmRunProcess("./build/scheduler.out", schedArgv, NULL, NULL);
     while (true) {
         semDown(semClockAwake);
         int time = getClk();
         printf("PGEN At %d\n", time);
-        while(sent < processNum && processes[sent].arrivalTime == time) {
+        while (sent < processNum && processes[sent].arrivalTime == time) {
             // printf("\tSENT id: %d\n", processes[sent].id);
             mqSend(msgQueueId, processes[sent]);
             sent++;
@@ -49,49 +51,7 @@ int main(int argc, char * argv[])
     raise(SIGINT);
 }
 
-void promptUser(char ***argv, int *argc) {
-    printf("Welcome! Please choose a scheduling algorithm:\n");
-    printf("1. Highest Priority First (HPF)\n");
-    printf("2. Shortest Remaining Time Next (SRTN)\n");
-    printf("3. Round Robin (RR)\n");
-
-    int choice;
-    printf("Enter your choice (1-3): ");
-    scanf("%d", &choice);
-
-    switch (choice) {
-        case 1:
-            *argc = 1; // Number of arguments excluding the command itself
-            *argv = (char **)malloc((*argc + 1) * sizeof(char *));
-            (*argv)[0] = "HPF"; // Command name
-            (*argv)[1] = NULL; // Null-terminated array of arguments
-            break;
-        case 2:
-            *argc = 1;
-            *argv = (char **)malloc((*argc + 1) * sizeof(char *));
-            (*argv)[0] = "SRTN";
-            (*argv)[1] = NULL;
-            break;
-        case 3:
-            // For RR, ask the user for the time quantum
-            *argc = 2;
-            *argv = (char **)malloc((*argc + 1) * sizeof(char *));
-            (*argv)[0] = "RR";
-            char *quantumStr = malloc(20); // Allocate memory for the quantum string
-            printf("Enter the time quantum for Round Robin: ");
-            scanf("%d", &choice);
-            sprintf(quantumStr, "%d", choice); // Convert integer to string
-            (*argv)[1] = quantumStr; // Assign the string to the arguments array
-            (*argv)[2] = NULL;
-            break;
-        default:
-            printf("Invalid choice. Please choose a number between 1 and 3.\n");
-            exit(EXIT_FAILURE);
-    }
-}
-
-void readInput(ProcessMessage **processes, int *processNum) {
-    const char *filename = "./processes.txt";
+void readInput(ProcessMessage **processes, int *processNum, const char* filename) {
     FILE *file = fopen(filename, "r");
 
     if (!file) {
@@ -139,7 +99,6 @@ void readInput(ProcessMessage **processes, int *processNum) {
 
 
 void clearResources(int signum) {
-    //TODO Clears all resources in case of interruption
     semDelete(semSyncRcv);
     semDelete(semClockAwake);
     mqDelete(msgQueueId);

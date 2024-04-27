@@ -7,13 +7,13 @@ bool shouldCount = true;
 int time = 0;
 
 void stopProcess(int signum) {
-    printf("Preempt\n");
+    // printf("Preempt\n");
     shouldCount = false;
     raise(SIGSTOP);
 }
 
 void continueProcess(int signum) {
-    printf("Cont timeprev=%d\n", time);
+    // printf("Cont timeprev=%d\n", time);
     shouldCount = true;
     time = getClk();
 }
@@ -41,7 +41,7 @@ int main(int agrc, char * argv[])
         int curTime = getClk();
         remainingtime -= curTime - time;
         time = curTime;
-        printf("In Process: %d, rem= %d\n", getpid(), remainingtime);
+        // printf("In Process: %d, rem= %d\n", getpid(), remainingtime);
     }
     raise(SIGINT);
     return 0;
