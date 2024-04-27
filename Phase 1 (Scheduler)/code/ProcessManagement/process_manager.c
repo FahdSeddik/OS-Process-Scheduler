@@ -2,6 +2,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include "../clk_utils.h"
+#include <time.h>
 
 pid_t pmRunProcess(const char* programPath, char * const argv[], PCB* pcb, Logger* logger) {
 
@@ -23,7 +24,7 @@ pid_t pmRunProcess(const char* programPath, char * const argv[], PCB* pcb, Logge
 
     if(pcb && logger) {
         pcb->processId = pid;
-        fprintf(stderr, "Child Started pid= %d\n", pcb->processId);
+        printf("Child Started pid= %d\n", pcb->processId);
         int time = getClk();
         pcb->startTime = time;
         pcbCalculateWaitingTime(pcb, time);
@@ -37,7 +38,8 @@ pid_t pmRunProcess(const char* programPath, char * const argv[], PCB* pcb, Logge
 
 int pmPreemptProcess(PCB* pcb, Logger* logger) {
     int result = kill(pcb->processId, PREEMPT);
-    fprintf(stderr, "Child pid= %d, preempted\n", pcb->processId);
+    printf("Child pid= %d, preempted\n", pcb->processId);
+    usleep(1000 * 10);
     int time = getClk();
     pcbCalculateWaitingTime(pcb, time);
     pcbUpdateProcessState(pcb, READY);
@@ -46,7 +48,7 @@ int pmPreemptProcess(PCB* pcb, Logger* logger) {
 }
 
 int pmContinueProcess(PCB* pcb, Logger* logger) {
-    fprintf(stderr, "Child pid= %d, resume\n", pcb->processId);
+    printf("Child pid= %d, resume\n", pcb->processId);
     int time = getClk();
     pcbCalculateWaitingTime(pcb, time);
     pcbUpdateProcessState(pcb, RUNNING);
@@ -56,7 +58,7 @@ int pmContinueProcess(PCB* pcb, Logger* logger) {
 }
 
 int pmKillProcess(PCB* pcb, Logger* logger) {
-    fprintf(stderr, "Child pid= %d, finished\n", pcb->processId);
+    printf("Child pid= %d, finished\n", pcb->processId);
     pcbUpdateProcessState(pcb, TERMINATED);
     int time = getClk();
     pcb->finishTime = time;

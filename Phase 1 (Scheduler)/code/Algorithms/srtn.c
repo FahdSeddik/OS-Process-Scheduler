@@ -72,7 +72,6 @@ void execSRTN() {
     if (mhIsEmpty(minHeapSRTN)) return;
 
     nextProcess = mhGetTop(minHeapSRTN);  // Peek at the shortest remaining time process without removing it
-    if(nextProcess) fprintf(stderr, "TOP pid=%d, rem=%d\n", nextProcess->processId, nextProcess->remainingTime);
     // Determine if we should preempt the current process
     if (currProcess && nextProcess->remainingTime >= currProcess->remainingTime) return;
     
@@ -94,8 +93,6 @@ void execSRTN() {
     } else {
         pmContinueProcess(nextProcess, loggerSRTN);
     }
-
-    nextProcess->finishTime = getClk() + nextProcess->remainingTime;
     infoSRTN->currentlyRunning = nextProcess;
 }
 

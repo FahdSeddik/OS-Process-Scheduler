@@ -93,7 +93,6 @@ PCB* startNextHPF() {
     sprintf(remTimeStr, "%d", pcb->remainingTime);
     char* argv[] = {remTimeStr, NULL};
     pcb->processId = pmRunProcess("./build/process.out", argv, pcb, loggerHPF);
-    pcb->finishTime = getClk() + pcb->runningTime;
     return pcb;
 }
 

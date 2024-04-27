@@ -35,7 +35,7 @@ int main(int argc, char * argv[])
         int time = getClk();
         printf("PGEN At %d\n", time);
         while(sent < processNum && processes[sent].arrivalTime == time) {
-            printf("\tSENT id: %d\n", processes[sent].id);
+            // printf("\tSENT id: %d\n", processes[sent].id);
             mqSend(msgQueueId, processes[sent]);
             sent++;
             if (sent == processNum) {

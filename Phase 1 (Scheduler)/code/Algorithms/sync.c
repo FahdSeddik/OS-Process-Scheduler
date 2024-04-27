@@ -16,7 +16,7 @@ int qRcvProc(qQueue* queue, int msgQueueId, int semSyncRcv) {
     ProcessMessage message;
     message.mtype = MESSAGE_MTYPE;
     while(mqReceiveNonBlocking(msgQueueId, &message) == 1) {
-        fprintf(stderr, "Rec id: %d\n", message.id);
+        printf("Rec id: %d\n", message.id);
         // Process generator finished processes
         if(message.id == -1) return -1;
         PCB* pcb = (PCB *)malloc(sizeof(PCB));
@@ -31,7 +31,7 @@ int mhRcvProc(mhMinHeap* minHeap, int msgQueueId, int semSyncRcv, bool keyIsPrio
     ProcessMessage message;
     message.mtype = MESSAGE_MTYPE;
     while(mqReceiveNonBlocking(msgQueueId, &message) == 1) {
-        fprintf(stderr, "Rec id: %d\n", message.id);
+        printf("Rec id: %d\n", message.id);
         // Process generator finished processes
         if(message.id == -1) return -1;
         PCB* pcb = (PCB *)malloc(sizeof(PCB));
