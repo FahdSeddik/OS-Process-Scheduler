@@ -32,7 +32,7 @@ current_idx = 0
 processes = []
 
 def main_loop(window):
-    
+    global current_idx, processes, figure_canvas_agg, fig, ax, logs_path
     while True:
         event, values = window.read(timeout=100)
         if event == sg.WIN_CLOSED:
@@ -43,7 +43,7 @@ def main_loop(window):
             handle_algorithm_change(values, window)
         
         if event == 'Submit':
-            processes, current_idx = handle_submit(values, window)
+            processes, current_idx = handle_submit(values, window, logs_path)
             if not figure_canvas_agg:
                 figure_canvas_agg = FigureCanvasTkAgg(fig,window['canvas'].TKCanvas)
             handle_plot_change(processes, current_idx, fig, ax, figure_canvas_agg, window)

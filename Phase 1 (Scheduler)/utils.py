@@ -62,7 +62,7 @@ def handle_algorithm_change(values, window):
     if not is_rr:
         window['quantum_time'].update('')
 
-def handle_submit(values, window):
+def handle_submit(values, window, logs_path):
     algorithm = values['algorithm']
     quantum_time = values['quantum_time']
     input_file = '/mnt/' + values['input_file'][0].lower() + values['input_file'][2:]
