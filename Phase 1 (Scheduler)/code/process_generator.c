@@ -6,12 +6,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
 
 void clearResources(int);
 void readInput(ProcessMessage **processes, int *processNum, const char* filename);
+bool validateArguments(int argc, char *argv[]);
 int msgQueueId, semSyncRcv, semClockAwake;
 ProcessMessage* processes;
 int main(int argc, char * argv[]) {
+    if (!validateArguments(argc, argv)) {
+        return EXIT_FAILURE;
+    }
     signal(SIGINT, clearResources);
     processes = NULL;
     int processNum = 0;
@@ -97,6 +102,41 @@ void readInput(ProcessMessage **processes, int *processNum, const char* filename
     fclose(file);
 }
 
+bool validateArguments(int argc, char *argv[]) {
+    if (argc < 3) {
+        errno = EINVAL;
+        perror("Invalid number of arguments");
+        return false;
+    }
+
+    if (access(argv[1], F_OK) == -1) {
+        errno = ENOENT;
+        perror("File does not exist");
+        return false;
+    }
+
+    // Check that argv[2] is either HPF, SRTN, or RR
+    if (strcmp(argv[2], "HPF") != 0 && strcmp(argv[2], "SRTN") != 0 && strcmp(argv[2], "RR") != 0) {
+        errno = EINVAL;
+        perror("Invalid scheduling algorithm");
+        return false;
+    }
+
+    if (strcmp(argv[2], "RR") == 0 && argc < 4) {
+        errno = EINVAL;
+        perror("Invalid number of arguments");
+        return false;
+    }
+
+    // Check that the quantum is a positive integer
+    if (strcmp(argv[2], "RR") == 0 && atoi(argv[3]) <= 0) {
+        errno = EINVAL;
+        perror("Invalid quantum value");
+        return false;
+    }
+
+    return true;
+}
 
 void clearResources(int signum) {
     semDelete(semSyncRcv);

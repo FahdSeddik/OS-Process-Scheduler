@@ -65,5 +65,6 @@ int pmKillProcess(PCB* pcb, Logger* logger) {
     pcbCalculateTurnaroundTime(pcb);
     loggerUpdateMetrics(logger, pcb->runningTime, pcb->waitingTime, pcb->turnaroundTime, pcb->weightedTurnaroundTime);
     loggerLogEvent(logger, time, pcb->id, "finished", pcb->arrivalTime, pcb->runningTime, 0, pcb->waitingTime, pcb->turnaroundTime, pcb->weightedTurnaroundTime);
+    waitpid(pcb->processId, NULL, 0);
     return kill(pcb->processId, SIGINT);
 }

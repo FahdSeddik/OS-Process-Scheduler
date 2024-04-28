@@ -15,7 +15,7 @@
 #include "ProcessManagement/message_queue.h"
 #include "ProcessManagement/semaphore.h"
 #include "clk_utils.h"
-
+#include <errno.h>
 
 Logger* logger = NULL;
 int semSyncTerminate;
@@ -31,6 +31,7 @@ void terminate(int signum) {
 int main(int argc, char *argv[]) {
     initClk();
     if (argc < 1) {
+        errno = EINVAL;
         perror("Invalid number of arguments");
         exit(-1);
     }
@@ -49,12 +50,14 @@ int main(int argc, char *argv[]) {
         initSRTN(msgQueueId, semSyncRcv, semSyncTerminate, logger);
     } else if (strcmp(algorithm, "RR") == 0) {
         if (argc < 2) {
+            errno = EINVAL;
             perror("Invalid number of arguments");
             exit(-1);
         }
         quantum = atoi(argv[1]);
         initRR(msgQueueId, semSyncRcv, semSyncTerminate, quantum, logger);
     } else {
+        errno = EINVAL;
         perror("Invalid algorithm");
         exit(-1);
     }

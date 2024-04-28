@@ -1,8 +1,9 @@
 import PySimpleGUI as sg
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from utils import get_time_steps, save_gif, handle_algorithm_change, handle_submit, handle_plot_change
-
+from utils import save_gif, handle_algorithm_change, handle_submit, handle_plot_change
+import queue
+import os
 
 # the layout of the window is as follows
 layout = [
@@ -25,14 +26,15 @@ window = sg.Window('Scheduler', layout)
 fig, ax = plt.subplots()
 
 figure_canvas_agg = None
-
+os.chdir(os.path.dirname(__file__) + '/code')
 logs_path = './logs/scheduler.log'
 
-current_idx = 0
-processes = []
+current_idx = None
+processes = None
 
 def main_loop(window):
     global current_idx, processes, figure_canvas_agg, fig, ax, logs_path
+    gui_queue = queue.Queue()
     while True:
         event, values = window.read(timeout=100)
         if event == sg.WIN_CLOSED:
@@ -43,15 +45,37 @@ def main_loop(window):
             handle_algorithm_change(values, window)
         
         if event == 'Submit':
-            processes, current_idx = handle_submit(values, window, logs_path)
-            if not figure_canvas_agg:
-                figure_canvas_agg = FigureCanvasTkAgg(fig,window['canvas'].TKCanvas)
-            handle_plot_change(processes, current_idx, fig, ax, figure_canvas_agg, window)
+            # check if the input file exists
+            if not os.path.exists(values['input_file']):
+                sg.popup('Please select an input file')
+                continue
+            handle_submit(values, window, logs_path, gui_queue)
+            window['Submit'].update(disabled=True)
+            
+        try:
+            processes, current_idx = gui_queue.get_nowait()
+            window['Next'].update(disabled=False)
+            window['Previous'].update(disabled=False)
+            window['Save GIF'].update(disabled=False)
+            current_idx = 1
+        except queue.Empty:
+            pass
         
+        if processes is None:
+            # disable the buttons if processes is None
+            window['Next'].update(disabled=True)
+            window['Previous'].update(disabled=True)
+            window['Save GIF'].update(disabled=True)
+            continue
+        
+        if not figure_canvas_agg:
+            figure_canvas_agg = FigureCanvasTkAgg(fig,window['canvas'].TKCanvas)
+        handle_plot_change(processes, current_idx, fig, ax, figure_canvas_agg, window)
+
         if event == 'Next' and current_idx < len(processes):
             current_idx += 1
             handle_plot_change(processes, current_idx, fig, ax, figure_canvas_agg, window)
-        
+
         if event == 'Previous' and current_idx > 1:
             current_idx -= 1
             handle_plot_change(processes, current_idx, fig, ax, figure_canvas_agg, window)
@@ -59,5 +83,4 @@ def main_loop(window):
         if event == 'Save GIF':
             save_gif(processes, ax)
 
-main_loop(window)      
-
+main_loop(window)

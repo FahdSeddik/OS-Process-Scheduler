@@ -1,9 +1,8 @@
 import imageio
-import PySimpleGUI as sg
 from chart import create_gantt_chart
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import subprocess
+import threading
 
 def parse_line(line):
     line = line.strip().split()
@@ -62,16 +61,21 @@ def handle_algorithm_change(values, window):
     if not is_rr:
         window['quantum_time'].update('')
 
-def handle_submit(values, window, logs_path):
+def handle_submit(values, window, logs_path, gui_queue):
     algorithm = values['algorithm']
     quantum_time = values['quantum_time']
     input_file = '/mnt/' + values['input_file'][0].lower() + values['input_file'][2:]
     window['status'].update('Running', visible=True)
-    command = ['wsl', "'./build/process_generator.out'", input_file, algorithm, quantum_time]
-    subprocess.run(command, shell=True, text=True, stderr=subprocess.STDOUT)
-    window['status'].update('Finished')
-    processes = get_time_steps(logs_path)
-    return processes, len(processes)
+    
+    def run_subprocess(gui_queue):
+        command = ['wsl', "'./build/process_generator.out'", input_file, algorithm, quantum_time]
+        subprocess.run(command, shell=True, text=True, stderr=subprocess.STDOUT)
+        window['status'].update('Finished')
+        processes = get_time_steps(logs_path)
+        gui_queue.put((processes, len(processes)))
+    
+    thread = threading.Thread(target=run_subprocess, args=(gui_queue,))
+    thread.start()
 
 def handle_plot_change(processes, current_idx, fig, ax, figure_canvas_agg, window):
     create_gantt_chart(processes, current_idx, ax)
