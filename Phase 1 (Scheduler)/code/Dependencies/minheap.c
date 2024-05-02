@@ -15,8 +15,14 @@ void mhMinHeapify(mhMinHeap *minHeap, int idx) {
 
     if (left < minHeap->size && minHeap->elements[left].key < minHeap->elements[smallest].key)
         smallest = left;
+    else if (left < minHeap->size && minHeap->elements[left].key == minHeap->elements[smallest].key &&
+                                    minHeap->elements[left].pcb->id < minHeap->elements[smallest].pcb->id)
+        smallest = left;
 
     if (right < minHeap->size && minHeap->elements[right].key < minHeap->elements[smallest].key)
+        smallest = right;
+    else if (right < minHeap->size && minHeap->elements[right].key == minHeap->elements[smallest].key &&
+                                minHeap->elements[right].pcb->id < minHeap->elements[smallest].pcb->id)
         smallest = right;
 
     if (smallest != idx) {
@@ -43,7 +49,7 @@ mhMinHeap* mhCreate(int capacity) {
 }
 
 void mhInsert(mhMinHeap *minHeap, PCB* pcb, int key) {
-     if (minHeap->size == minHeap->capacity) {
+    if (minHeap->size == minHeap->capacity) {
         int newCapacity = minHeap->capacity * 2;
         mhHeapNode* newElements = (mhHeapNode *) realloc(minHeap->elements, newCapacity * sizeof(mhHeapNode));
         if (!newElements) {
@@ -59,7 +65,9 @@ void mhInsert(mhMinHeap *minHeap, PCB* pcb, int key) {
     minHeap->elements[i].key = key;
 
     // Heapify up
-    while (i != 0 && minHeap->elements[(i - 1) / 2].key > minHeap->elements[i].key) {
+    while (i != 0 && (minHeap->elements[(i - 1) / 2].key > minHeap->elements[i].key ||
+                      (minHeap->elements[(i - 1) / 2].key == minHeap->elements[i].key &&
+                       minHeap->elements[(i - 1) / 2].pcb->id > minHeap->elements[i].pcb->id))) {
         mhSwapHeapNode(&minHeap->elements[i], &minHeap->elements[(i - 1) / 2]);
         i = (i - 1) / 2;
     }
