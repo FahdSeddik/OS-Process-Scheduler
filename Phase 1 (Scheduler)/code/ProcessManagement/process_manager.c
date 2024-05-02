@@ -57,7 +57,7 @@ int pmContinueProcess(PCB* pcb, Logger* logger) {
     return kill(pcb->processId, CONTINUE);
 }
 
-int pmKillProcess(PCB* pcb, Logger* logger) {
+int pmFinishProcess(PCB* pcb, Logger* logger) {
     // printf("Child pid= %d, finished\n", pcb->processId);
     pcbUpdateProcessState(pcb, TERMINATED);
     int time = getClk();

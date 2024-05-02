@@ -98,7 +98,7 @@ void execSRTN() {
 
 void catchTerminatedSRTN(int signum) {
     if (!infoSRTN->currentlyRunning) return; // Must be error
-    pmKillProcess(infoSRTN->currentlyRunning, loggerSRTN);
+    pmFinishProcess(infoSRTN->currentlyRunning, loggerSRTN);
     free(infoSRTN->currentlyRunning);
     infoSRTN->currentlyRunning = NULL;
 }

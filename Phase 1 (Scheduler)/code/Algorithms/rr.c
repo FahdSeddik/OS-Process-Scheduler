@@ -102,7 +102,7 @@ void startNextRR(PCB* pcb) {
 
 void catchTerminatedRR(int signum) {
     if (!infoRR->currentlyRunning) return; // Must be error
-    pmKillProcess(infoRR->currentlyRunning, loggerRR);
+    pmFinishProcess(infoRR->currentlyRunning, loggerRR);
     free(infoRR->currentlyRunning);
     infoRR->currentlyRunning = NULL;
 }

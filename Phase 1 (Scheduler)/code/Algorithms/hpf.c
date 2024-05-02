@@ -99,7 +99,7 @@ PCB* startNextHPF() {
 void catchTerminatedHPF(int signum) {
     // Process has finished, so terminate and deallocate it
     if (!infoHPF->currentlyRunning) return; // Must be error
-    pmKillProcess(infoHPF->currentlyRunning, loggerHPF);
+    pmFinishProcess(infoHPF->currentlyRunning, loggerHPF);
     free(infoHPF->currentlyRunning);
     infoHPF->currentlyRunning = NULL;
 }
