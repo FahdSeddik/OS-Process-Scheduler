@@ -57,6 +57,7 @@ def main_loop(window):
             window['Next'].update(disabled=False)
             window['Previous'].update(disabled=False)
             window['Save GIF'].update(disabled=False)
+            window['Submit'].update(disabled=True)
             current_idx = 1
         except queue.Empty:
             pass

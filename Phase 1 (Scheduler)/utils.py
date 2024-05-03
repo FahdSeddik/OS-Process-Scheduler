@@ -3,6 +3,8 @@ from chart import create_gantt_chart
 import matplotlib.pyplot as plt
 import subprocess
 import threading
+from PIL import Image
+import io
 
 def parse_line(line):
     line = line.strip().split()
@@ -44,15 +46,18 @@ def get_time_steps(logs_path):
     update_time_steps(time_steps, processes, arrivals)
     return time_steps
 
+
 def save_plot_as_image(i, processes, ax):
     create_gantt_chart(processes, i, ax)
-    image_path = f'plot_{i}.png'
-    plt.savefig(image_path)
-    return image_path
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    img = Image.open(buf)
+    return img
 
 def save_gif(processes, ax):
     images = [save_plot_as_image(i, processes, ax) for i in range(len(processes)+1)]
-    imageio.mimsave('gantt.gif', [imageio.imread(image) for image in images])
+    imageio.mimsave('gantt.gif', images)
 
 def handle_algorithm_change(values, window):
     is_rr = values['algorithm'] == 'RR'
