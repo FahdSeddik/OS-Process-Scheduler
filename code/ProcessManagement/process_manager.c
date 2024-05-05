@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "../clk_utils.h"
 #include <unistd.h>
+#include "../MemoryManagement/buddy.h"
 
 pid_t pmRunProcess(const char* programPath, char * const argv[], PCB* pcb, Logger* logger) {
 

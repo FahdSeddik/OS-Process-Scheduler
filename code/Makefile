@@ -1,7 +1,7 @@
 CC = gcc
 
 # Group together likely to be used together files
-DEP = ./Dependencies/minheap.c ./Dependencies/queue.c ./Dependencies/pcb.c
+DEP = ./Dependencies/minheap.c ./Dependencies/queue.c ./Dependencies/pcb.c ./MemoryManagement/buddy.c
 ALGO = ./Algorithms/hpf.c ./Algorithms/rr.c ./Algorithms/srtn.c ./Algorithms/sync.c
 PMGR = ./ProcessManagement/message_queue.c ./ProcessManagement/process_manager.c ./ProcessManagement/semaphore.c
 LOGG = ./Logging/logger.c -lm

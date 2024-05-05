@@ -5,6 +5,7 @@
 #include "../clk_utils.h"
 #include "../ProcessManagement/semaphore.h"
 #include "../ProcessManagement/process_manager.h"
+#include "../MemoryManagement/buddy.h"
 
 /*
     ========================================================
