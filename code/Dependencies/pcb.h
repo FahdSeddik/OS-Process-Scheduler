@@ -2,6 +2,7 @@
 #define PCB_H
 
 #include <sys/types.h>
+#include "../MemoryManagement/buddy.h"
 
 typedef enum {
     READY, RUNNING, BLOCKED, TERMINATED
@@ -19,6 +20,8 @@ typedef struct {
     int lastExecTime;       // Last time when the process was in RUNNING state
     int startTime;          // Time when the process was first started (used for turnaround time calculation)
     int finishTime;         // Time when the process finishes execution
+    int memsize;            // Memory size required by the process
+    bsBlock* memoryBlock;   // Memory block allocated to the process
 
     // Additional fields for statistical purposes
     int turnaroundTime;    // Total time from arrival to completion
