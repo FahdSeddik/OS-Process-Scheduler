@@ -16,9 +16,11 @@
 #include "ProcessManagement/semaphore.h"
 #include "clk_utils.h"
 #include <errno.h>
+#include "./MemoryManagement/buddy.h"
 
 Logger* logger = NULL;
 int semSyncTerminate;
+bsBuddySystem* buddySystem;
 void terminate(int signum) {
     destroyClk(true);
     if(logger) loggerDestroy(logger);
@@ -43,11 +45,12 @@ int main(int argc, char *argv[]) {
     semInitialize(semSyncTerminate, 0);
     char *algorithm = argv[0];
     int quantum = 0;
+    buddySystem = bsCreate();
 
     if (strcmp(algorithm, "HPF") == 0) {
-        initHPF(msgQueueId, semSyncRcv, semSyncTerminate, logger);
+        initHPF(msgQueueId, semSyncRcv, semSyncTerminate, logger, buddySystem);
     } else if (strcmp(algorithm, "SRTN") == 0) {
-        initSRTN(msgQueueId, semSyncRcv, semSyncTerminate, logger);
+        initSRTN(msgQueueId, semSyncRcv, semSyncTerminate, logger, buddySystem);
     } else if (strcmp(algorithm, "RR") == 0) {
         if (argc < 2) {
             errno = EINVAL;
@@ -55,7 +58,7 @@ int main(int argc, char *argv[]) {
             exit(-1);
         }
         quantum = atoi(argv[1]);
-        initRR(msgQueueId, semSyncRcv, semSyncTerminate, quantum, logger);
+        initRR(msgQueueId, semSyncRcv, semSyncTerminate, quantum, logger, buddySystem);
     } else {
         errno = EINVAL;
         perror("Invalid algorithm");
@@ -68,6 +71,7 @@ int main(int argc, char *argv[]) {
     destroyClk(true);
     loggerDestroy(logger);
     semDelete(semSyncTerminate);
+    bsDestroy(buddySystem);
     // SIGINT process generator to clear resources
     kill(getppid(), SIGINT);
     return 0;

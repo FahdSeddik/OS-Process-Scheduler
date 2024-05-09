@@ -1,5 +1,6 @@
 #include "hpf.h"
 #include "../Dependencies/minheap.h"
+#include "../Dependencies/list.h"
 #include "sync.h"
 #include "../headers.h"
 #include "../clk_utils.h"
@@ -49,17 +50,30 @@ PCB* startNextHPF();
  */
 void catchTerminatedHPF(int signum);
 
+/**
+ * Handles the waiting processes by allocating memory for them and adding them to the heap.
+ * @param waitingList A pointer to the list of waiting processes.
+ * @param heap A pointer to the min-heap of processes.
+ * @param buddySystem A pointer to the buddy system allocator.
+ */
+void handleWaitingProcessesHPF(lList* waitingList, mhMinHeap* heap , bsBuddySystem* buddySystem);
+
 
 SchedulerInfo* infoHPF = NULL;
 Logger* loggerHPF = NULL;
 mhMinHeap* minHeapHPF = NULL;
 int semSyncTerminateHPF;
+// Waiting list for processes that can't be added to the heap because of memory shortage
+lList* waitingListHPF = NULL;  
+bsBuddySystem* buddySystemHPF = NULL;
 
-void initHPF(int msgQueueId, int semSyncRcv, int semSyncTerminate, Logger* logger) {
+void initHPF(int msgQueueId, int semSyncRcv, int semSyncTerminate, Logger* logger, bsBuddySystem* buddySystem){
     int initialCapacity = 16;
-    minHeapHPF = mhCreate(16);
+    minHeapHPF = mhCreate(initialCapacity);
+    waitingListHPF = lCreate();
     signal(SIGUSR1, catchTerminatedHPF);
     loggerHPF = logger;
+    buddySystemHPF = buddySystem;
     infoHPF = malloc(sizeof(SchedulerInfo));
     semSyncTerminateHPF = semSyncTerminate;
     schdInit(infoHPF);
@@ -69,16 +83,20 @@ void initHPF(int msgQueueId, int semSyncRcv, int semSyncTerminate, Logger* logge
             currentProcess->remainingTime--;
             if (currentProcess->remainingTime == 0) semDown(semSyncTerminateHPF);
         }
-        if (mhRcvProc(minHeapHPF, msgQueueId, semSyncRcv, true) == -1) infoHPF->finishGenerate = true;
+        if (qRcvProc(waitingListHPF, msgQueueId, semSyncRcv) == -1) infoHPF->finishGenerate = true;
+        handleWaitingProcessesHPF(waitingListHPF, minHeapHPF, buddySystemHPF);
         execHPF();
         if(!infoHPF->currentlyRunning) loggerCPUWait(loggerHPF, 1);
     }
     signal(SIGUSR1, SIG_DFL);
     mhFree(minHeapHPF);
     minHeapHPF = NULL;
+    lFree(waitingListHPF);
+    waitingListHPF = NULL;
     free(infoHPF);
     infoHPF = NULL;
     loggerHPF = NULL;
+    buddySystemHPF = NULL;
 }
 
 void execHPF() {
@@ -100,7 +118,23 @@ PCB* startNextHPF() {
 void catchTerminatedHPF(int signum) {
     // Process has finished, so terminate and deallocate it
     if (!infoHPF->currentlyRunning) return; // Must be error
-    pmFinishProcess(infoHPF->currentlyRunning, loggerHPF);
+    pmFinishProcess(infoHPF->currentlyRunning, loggerHPF, buddySystemHPF);
     free(infoHPF->currentlyRunning);
     infoHPF->currentlyRunning = NULL;
+    // try to allocate memory for waiting processes
+    handleWaitingProcessesHPF(waitingListHPF, minHeapHPF, buddySystemHPF);
+}
+
+void handleWaitingProcessesHPF(lList* waitingList, mhMinHeap* heap, bsBuddySystem* buddySystem) {
+    lListNode* iter = lBegin(waitingList);
+    while (iter != lEnd(waitingList)) {
+        // printf("Handling waiting process %d at time %d memsize %d\n", iter->pcb->id, getClk(), iter->pcb->memsize);
+        PCB* pcb = iter->pcb;
+        if (!allocateMemoryForProcess(buddySystem, pcb)) {
+            iter = lGetNext(waitingList, iter);
+            continue;
+        }
+        iter = lRemove(waitingList, iter);
+        mhInsert(heap, pcb, pcb->priority);
+    }
 }

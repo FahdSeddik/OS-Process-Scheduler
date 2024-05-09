@@ -2,7 +2,7 @@
 #define SRTN_H
 
 #include "../Logging/logger.h"
-#include "../Dependencies/minheap.h"
+#include "../MemoryManagement/buddy.h"
 // TODO: Implement this function in srtn.c
 // Note: you may change its interface as you like remove/add anything this is just a draft
 
@@ -14,6 +14,6 @@
  * @param semSyncTerminate An id for the semaphore that ensures termination signals are synced.
  * @param logger A pointer to the logger.
  */
-void initSRTN(int msgQueueId, int semSyncRcv, int semSyncTerminate, Logger* logger);
+void initSRTN(int msgQueueId, int semSyncRcv, int semSyncTerminate, Logger* logger, bsBuddySystem* buddySystem);
 
 #endif // SRTN_H

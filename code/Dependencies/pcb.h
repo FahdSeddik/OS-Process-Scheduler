@@ -39,7 +39,7 @@ typedef struct {
  * @param arrivalTime The time when the process is scheduled to arrive.
  * @param runningTime The total CPU burst time required by the process.
  */
-void pcbInit(PCB *pcb, int id, int priority, int arrivalTime, int runningTime);
+void pcbInit(PCB *pcb, int id, int priority, int arrivalTime, int runningTime, int memsize, bsBlock* memoryBlock);
 
 /**
  * Updates the state of a process represented by a PCB.

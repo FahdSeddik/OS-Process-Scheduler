@@ -100,3 +100,14 @@ void bsDisplayAddressBook(bsBuddySystem* buddySystem) {
     }
     printf("=== End Address Book ===\n");
 }
+
+void bsDestroy(bsBuddySystem* buddySystem) {
+    for (int i = 0; i < BS_MAX_SIZE / BS_MIN_BLOCK_SIZE; i++) {
+        if (buddySystem->addressBook[i] != NULL) {
+            free(buddySystem->addressBook[i]);
+            buddySystem->addressBook[i] = NULL;
+        }
+    }
+    free(buddySystem->addressBook);
+    free(buddySystem);
+}

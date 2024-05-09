@@ -2,9 +2,11 @@
 #include "sync.h"
 #include "../headers.h"
 #include "../clk_utils.h"
+#include "../Dependencies/minheap.h"
+#include "../Dependencies/list.h"
 #include "../ProcessManagement/semaphore.h"
 #include "../ProcessManagement/process_manager.h"
-#include "../MemoryManagement/buddy.h"
+
 
 
 /*
@@ -35,16 +37,29 @@ void execSRTN();
  */
 void catchTerminatedSRTN(int signum);
 
+/**
+ * Handles the waiting processes by allocating memory for them and adding them to the heap.
+ * @param waitingList A pointer to the list of waiting processes.
+ * @param heap A pointer to the min-heap of processes.
+ * @param buddySystem A pointer to the buddy system allocator.
+ */
+void handleWaitingProcessesSRTN(lList* waitingList, mhMinHeap* heap, bsBuddySystem* buddySystem);
+
 SchedulerInfo* infoSRTN = NULL;
 Logger* loggerSRTN = NULL;
 mhMinHeap* minHeapSRTN = NULL;
 int semSyncTerminateSRTN;
+// Waiting list for processes that can't be added to the heap because of memory shortage
+lList* waitingListSRTN = NULL; 
+bsBuddySystem* buddySystemSRTN = NULL;
 
-void initSRTN(int msgQueueId, int semSyncRcv, int semSyncTerminate, Logger* logger) {
+void initSRTN(int msgQueueId, int semSyncRcv, int semSyncTerminate, Logger* logger, bsBuddySystem* buddySystem) {
     int initialCapacity = 16;
-    minHeapSRTN = mhCreate(16);
+    minHeapSRTN = mhCreate(initialCapacity);
+    waitingListSRTN = lCreate();
     signal(SIGUSR1, catchTerminatedSRTN);
     loggerSRTN = logger;
+    buddySystemSRTN = buddySystem;
     infoSRTN = malloc(sizeof(SchedulerInfo));
     semSyncTerminateSRTN = semSyncTerminate;
     schdInit(infoSRTN);
@@ -54,16 +69,20 @@ void initSRTN(int msgQueueId, int semSyncRcv, int semSyncTerminate, Logger* logg
             currentProcess->remainingTime--;
             if (currentProcess->remainingTime == 0) semDown(semSyncTerminateSRTN);
         }
-        if (mhRcvProc(minHeapSRTN, msgQueueId, semSyncRcv, false) == -1) infoSRTN->finishGenerate = true;
+        if (qRcvProc(waitingListSRTN, msgQueueId, semSyncRcv) == -1) infoSRTN->finishGenerate = true;
+        handleWaitingProcessesSRTN(waitingListSRTN, minHeapSRTN, buddySystemSRTN);
         execSRTN();
         if(!infoSRTN->currentlyRunning) loggerCPUWait(loggerSRTN, 1);
     }
     signal(SIGUSR1, SIG_DFL);
     mhFree(minHeapSRTN);
     minHeapSRTN = NULL;
+    lFree(waitingListSRTN);
+    waitingListSRTN = NULL;
     free(infoSRTN);
     infoSRTN = NULL;
     loggerSRTN = NULL;
+    buddySystemSRTN = NULL;
 }
 
 void execSRTN() {
@@ -99,7 +118,22 @@ void execSRTN() {
 
 void catchTerminatedSRTN(int signum) {
     if (!infoSRTN->currentlyRunning) return; // Must be error
-    pmFinishProcess(infoSRTN->currentlyRunning, loggerSRTN);
+    pmFinishProcess(infoSRTN->currentlyRunning, loggerSRTN, buddySystemSRTN);
     free(infoSRTN->currentlyRunning);
     infoSRTN->currentlyRunning = NULL;
+    handleWaitingProcessesSRTN(waitingListSRTN, minHeapSRTN, buddySystemSRTN);
+}
+
+void handleWaitingProcessesSRTN(lList* waitingList, mhMinHeap* heap, bsBuddySystem* buddySystem) {
+    lListNode* iter = lBegin(waitingList);
+    while (iter != lEnd(waitingList)) {
+        // printf("Handling waiting process %d at time %d memsize %d\n", iter->pcb->id, getClk(), iter->pcb->memsize);
+        PCB* pcb = iter->pcb;
+        if (!allocateMemoryForProcess(buddySystem, pcb)) {
+            iter = lGetNext(waitingList, iter);
+            continue;
+        }
+        iter = lRemove(waitingList, iter);
+        mhInsert(heap, pcb, pcb->remainingTime);
+    }
 }

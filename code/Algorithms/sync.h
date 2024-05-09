@@ -1,8 +1,9 @@
 #ifndef SYNC_PROCESSES_H
 #define SYNC_PROCESSES_H
 
-#include "../Dependencies/minheap.h"
-#include "../Dependencies/queue.h"
+// #include "../Dependencies/minheap.h"
+#include "../Dependencies/list.h"
+#include "../Dependencies/bool.h"
 
 /*
     ============================================================
@@ -30,25 +31,24 @@ void schdInit(SchedulerInfo* info);
  * Receives and processes messages from a message queue and enqueues the resultant PCBs into a queue.
  * This function is typically used to receive process data and store them in a scheduling queue.
  *
- * @param queue A pointer to the queue where the PCBs will be enqueued.
+ * @param list A pointer to the list where the PCBs will be appended.
  * @param msgQueueId The message queue identifier from which messages are received.
  * @param semSyncRcv The semaphore ID used for synchronizing the receive operation.
  *
  * @return Returns 0 on successful processing of all messages, or -1 if a termination message is received.
  */
-int qRcvProc(qQueue* queue, int msgQueueId, int semSyncRcv);
+int qRcvProc(lList* list, int msgQueueId, int semSyncRcv);
 
 /**
- * Receives messages from a message queue, initializes PCBs based on these messages, and inserts them into the min-heap.
- * The key for the min-heap can be determined based on either the priority or the remaining time of the process, depending on the keyIsPrio flag.
+ * Allocates memory for a process and assigns the memory block to the process.
+ * This function is typically used to allocate memory for a process before adding it to the scheduling queue.
  *
- * @param minHeap A pointer to the min-heap where the PCBs will be inserted.
- * @param msgQueueId The message queue identifier from which messages are received.
- * @param semSyncRcv The semaphore ID used for synchronizing the receive operation.
- * @param keyIsPrio A boolean flag indicating whether the priority (true) or the remaining time (false) should be used as the key in the min-heap.
+ * @param buddySystem A pointer to the buddy system allocator used for memory allocation.
+ * @param pcb A pointer to the PCB structure for which memory is allocated.
  *
- * @return Returns 0 on successful processing of all messages, or -1 if a termination message is received.
+ * @return Returns a pointer to the allocated memory block if successful, or NULL if memory allocation fails.
  */
-int mhRcvProc(mhMinHeap* minHeap, int msgQueueId, int semSyncRcv, bool keyIsPrio);
+bsBlock* allocateMemoryForProcess(bsBuddySystem* buddySystem, PCB* pcb);
+
 
 #endif // SYNC_PROCESSES_H

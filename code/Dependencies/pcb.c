@@ -1,7 +1,7 @@
 // pcb.c
 #include "pcb.h"
 
-void pcbInit(PCB *pcb, int id, int priority, int arrivalTime, int runningTime) {
+void pcbInit(PCB *pcb, int id, int priority, int arrivalTime, int runningTime, int memsize, bsBlock* memoryBlock) {
     pcb->id = id;
     pcb->processId = -1;
     pcb->priority = priority;
@@ -15,6 +15,8 @@ void pcbInit(PCB *pcb, int id, int priority, int arrivalTime, int runningTime) {
     pcb->turnaroundTime = 0;
     pcb->weightedTurnaroundTime = 0.0;
     pcb->state = READY;
+    pcb->memsize = memsize;
+    pcb->memoryBlock = memoryBlock;
 }
 
 void pcbUpdateProcessState(PCB *pcb, ProcessState newState) {

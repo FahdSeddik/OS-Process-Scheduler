@@ -83,7 +83,7 @@ void readInput(ProcessMessage **processes, int *processNum, const char* filename
         raise(SIGINT);
     }
 
-    while (fscanf(file, "%d %d %d %d", &temp.id, &temp.arrivalTime, &temp.runningTime, &temp.priority) == 4) {
+    while (fscanf(file, "%d %d %d %d %d", &temp.id, &temp.arrivalTime, &temp.runningTime, &temp.priority, &temp.memsize) == 5) {
         if (count >= capacity) {
             capacity *= 2;  // Double the capacity
             *processes = realloc(*processes, capacity * sizeof(ProcessMessage));

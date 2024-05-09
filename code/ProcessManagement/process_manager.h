@@ -48,6 +48,6 @@ int pmContinueProcess(PCB* pcb, Logger* logger);
  * @param pcb A Pointer to the process control block.
  * @param logger A pointer to the logger.
  */
-int pmFinishProcess(PCB* pcb, Logger* logger);
+int pmFinishProcess(PCB* pcb, Logger* logger, bsBuddySystem* buddySystemHPF);
 
 #endif // PROCESS_MANAGER_H

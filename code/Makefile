@@ -1,9 +1,9 @@
 CC = gcc
 
 # Group together likely to be used together files
-DEP = ./Dependencies/minheap.c ./Dependencies/queue.c ./Dependencies/pcb.c ./MemoryManagement/buddy.c
+DEP = ./Dependencies/minheap.c ./Dependencies/queue.c ./Dependencies/pcb.c ./Dependencies/list.c
 ALGO = ./Algorithms/hpf.c ./Algorithms/rr.c ./Algorithms/srtn.c ./Algorithms/sync.c
-PMGR = ./ProcessManagement/message_queue.c ./ProcessManagement/process_manager.c ./ProcessManagement/semaphore.c
+PMGR = ./ProcessManagement/message_queue.c ./MemoryManagement/buddy.c ./ProcessManagement/process_manager.c ./ProcessManagement/semaphore.c
 LOGG = ./Logging/logger.c -lm
 
 # Any used files that are needed in each of those should be here

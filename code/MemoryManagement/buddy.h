@@ -48,4 +48,11 @@ void bsDeallocate(bsBuddySystem* buddySystem, bsBlock* block);
  */
 void bsDisplayAddressBook(bsBuddySystem* buddySystem);
 
+/**
+ * Destroys the buddy system.
+ * 
+ * @param buddySystem Pointer to the buddy system struct.
+ */
+void bsDestroy(bsBuddySystem* buddySystem);
+
 #endif // BUDDY_H

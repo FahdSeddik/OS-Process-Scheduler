@@ -2,6 +2,7 @@
 #define RR_H
 
 #include "../Logging/logger.h"
+#include "../MemoryManagement/buddy.h"
 
 // TODO: Implement this function in rr.c
 // Note: you may change its interface as you like remove/add anything this is just a draft
@@ -14,7 +15,7 @@
  * @param quantum A value for the quantum used in RR algorithm.
  * @param logger A pointer to the logger.
  */
-void initRR(int msgQueueId, int semSyncRcv, int semSyncTerminate, int quantum, Logger* logger);
+void initRR(int msgQueueId, int semSyncRcv, int semSyncTerminate, int quantum, Logger* logger, bsBuddySystem* buddySystem);
 
 
 #endif // RR_H

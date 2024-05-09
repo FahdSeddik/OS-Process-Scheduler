@@ -15,6 +15,7 @@ typedef struct {
     int arrivalTime;    // Arrival time of the process
     int runningTime;    // Running time of the process
     int priority;       // Priority of the process
+    int memsize;        // Memory size required by the process
 } ProcessMessage;
 
 /**

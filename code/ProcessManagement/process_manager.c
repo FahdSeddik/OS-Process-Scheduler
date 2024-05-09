@@ -58,7 +58,7 @@ int pmContinueProcess(PCB* pcb, Logger* logger) {
     return kill(pcb->processId, CONTINUE);
 }
 
-int pmFinishProcess(PCB* pcb, Logger* logger) {
+int pmFinishProcess(PCB* pcb, Logger* logger, bsBuddySystem* buddySystemHPF) {
     // printf("Child pid= %d, finished\n", pcb->processId);
     pcbUpdateProcessState(pcb, TERMINATED);
     int time = getClk();
@@ -67,5 +67,7 @@ int pmFinishProcess(PCB* pcb, Logger* logger) {
     loggerUpdateMetrics(logger, pcb->runningTime, pcb->waitingTime, pcb->turnaroundTime, pcb->weightedTurnaroundTime);
     loggerLogEvent(logger, time, pcb->id, "finished", pcb->arrivalTime, pcb->runningTime, 0, pcb->waitingTime, pcb->turnaroundTime, pcb->weightedTurnaroundTime);
     waitpid(pcb->processId, NULL, 0);
+    // deallocate memory
+    bsDeallocate(buddySystemHPF, pcb->memoryBlock);
     return kill(pcb->processId, SIGINT);
 }

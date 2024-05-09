@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
 void schdInit(SchedulerInfo* info) {
     info->finishGenerate = false;
     info->currentlyRunning = NULL;
@@ -11,7 +12,7 @@ void schdInit(SchedulerInfo* info) {
 }
 
 
-int qRcvProc(qQueue* queue, int msgQueueId, int semSyncRcv) {
+int qRcvProc(lList* list, int msgQueueId, int semSyncRcv) {
     semDown(semSyncRcv);
     ProcessMessage message;
     message.mtype = MESSAGE_MTYPE;
@@ -20,23 +21,19 @@ int qRcvProc(qQueue* queue, int msgQueueId, int semSyncRcv) {
         // Process generator finished processes
         if(message.id == -1) return -1;
         PCB* pcb = (PCB *)malloc(sizeof(PCB));
-        pcbInit(pcb, message.id, message.priority, message.arrivalTime, message.runningTime);
-        qEnqueue(queue, pcb);
+        pcbInit(pcb, message.id, message.priority, message.arrivalTime, message.runningTime, message.memsize, NULL);
+        lInsert(list, pcb);
     }
     return 0;
 }
 
-int mhRcvProc(mhMinHeap* minHeap, int msgQueueId, int semSyncRcv, bool keyIsPrio) {
-    semDown(semSyncRcv);
-    ProcessMessage message;
-    message.mtype = MESSAGE_MTYPE;
-    while(mqReceiveNonBlocking(msgQueueId, &message) == 1) {
-        // printf("Rec id: %d\n", message.id);
-        // Process generator finished processes
-        if(message.id == -1) return -1;
-        PCB* pcb = (PCB *)malloc(sizeof(PCB));
-        pcbInit(pcb, message.id, message.priority, message.arrivalTime, message.runningTime);
-        mhInsert(minHeap, pcb, keyIsPrio ? pcb->priority:pcb->remainingTime);
+bsBlock* allocateMemoryForProcess(bsBuddySystem* buddySystem, PCB* pcb) {
+    bsBlock* memoryBlock = bsAllocate(buddySystem, pcb->memsize);
+    if (!memoryBlock) {
+        printf("Can't allocate memory of %d bytes for process %d\n", pcb->memsize, pcb->id);
+        return NULL;
     }
-    return 0;
+    printf("Allocated memory of %d bytes for process %d\n", pcb->memsize, pcb->id);
+    pcb->memoryBlock = memoryBlock;
+    return memoryBlock;
 }
