@@ -1,9 +1,9 @@
 #ifndef SYNC_PROCESSES_H
 #define SYNC_PROCESSES_H
 
-// #include "../Dependencies/minheap.h"
 #include "../Dependencies/list.h"
 #include "../Dependencies/bool.h"
+#include "../Logging/logger.h"
 
 /*
     ============================================================
@@ -45,10 +45,11 @@ int qRcvProc(lList* list, int msgQueueId, int semSyncRcv);
  *
  * @param buddySystem A pointer to the buddy system allocator used for memory allocation.
  * @param pcb A pointer to the PCB structure for which memory is allocated.
+ * @param logger A pointer to the logger used for logging memory allocation events.
  *
  * @return Returns a pointer to the allocated memory block if successful, or NULL if memory allocation fails.
  */
-bsBlock* allocateMemoryForProcess(bsBuddySystem* buddySystem, PCB* pcb);
+bsBlock* allocateMemoryForProcess(bsBuddySystem* buddySystem, PCB* pcb, Logger* logger);
 
 
 #endif // SYNC_PROCESSES_H

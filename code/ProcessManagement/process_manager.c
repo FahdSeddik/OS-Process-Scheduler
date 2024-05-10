@@ -66,6 +66,7 @@ int pmFinishProcess(PCB* pcb, Logger* logger, bsBuddySystem* buddySystemHPF) {
     pcbCalculateTurnaroundTime(pcb);
     loggerUpdateMetrics(logger, pcb->runningTime, pcb->waitingTime, pcb->turnaroundTime, pcb->weightedTurnaroundTime);
     loggerLogEvent(logger, time, pcb->id, "finished", pcb->arrivalTime, pcb->runningTime, 0, pcb->waitingTime, pcb->turnaroundTime, pcb->weightedTurnaroundTime);
+    loggerLogMemoryEvent(logger, time, pcb->id, "freed", pcb->memsize, pcb->memoryBlock->addressStart, pcb->memoryBlock->addressStart + pcb->memoryBlock->size - 1);
     waitpid(pcb->processId, NULL, 0);
     // deallocate memory
     bsDeallocate(buddySystemHPF, pcb->memoryBlock);

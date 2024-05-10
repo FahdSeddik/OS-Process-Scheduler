@@ -15,6 +15,7 @@
 typedef struct Logger {
     FILE *logFile;
     FILE *perfFile;
+    FILE * memFile;
     double totalRuntime;
     double totalWaitingTime;
     double cpuWaitingTime;
@@ -29,9 +30,10 @@ typedef struct Logger {
  * Initializes the logger
  * @param logPath Path to the log file
  * @param perfPath Path to the performance file
+ * @param memPath Path to the memory log file
  * @return Logger* Pointer to initialized Logger structure
  */
-Logger* loggerInit(const char* logPath, const char* perfPath);
+Logger* loggerInit(const char* logPath, const char* perfPath, const char* memPath);
 
 /**
  * Logs a process event to the scheduler log file
@@ -70,6 +72,19 @@ void loggerUpdateMetrics(Logger* logger, double runtime, double wait, double ta,
  * @param logger Pointer to the Logger structure
  */
 void loggerWritePerformanceData(Logger* logger);
+
+/**
+ * Logs a memory event to the logger.
+ *
+ * @param logger The logger object.
+ * @param time The time of the memory event.
+ * @param pid The process ID associated with the memory event.
+ * @param state The state of the memory event.
+ * @param memsize The size of the memory event.
+ * @param addressStart The starting address of the memory event.
+ * @param addressEnd The ending address of the memory event.
+ */
+void loggerLogMemoryEvent(Logger* logger, int time, int pid, const char* state, int memsize, int addressStart, int addressEnd);
 
 /**
  * Closes the log and performance files and frees the Logger structure

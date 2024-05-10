@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
         exit(-1);
     }
     signal(SIGINT, terminate);
-    logger = loggerInit("./logs/scheduler.log", "./logs/scheduler.perf");
+    logger = loggerInit("./logs/scheduler.log", "./logs/scheduler.perf", "./logs/memory.log");
     int msgQueueId = mqCreate("./Keys/key1", 0);
     int semSyncRcv = semCreate("./Keys/key1", 0);
     semSyncTerminate = semCreate("./Keys/key1", 2);

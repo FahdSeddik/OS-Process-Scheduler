@@ -129,7 +129,7 @@ void handleWaitingProcessesSRTN(lList* waitingList, mhMinHeap* heap, bsBuddySyst
     while (iter != lEnd(waitingList)) {
         // printf("Handling waiting process %d at time %d memsize %d\n", iter->pcb->id, getClk(), iter->pcb->memsize);
         PCB* pcb = iter->pcb;
-        if (!allocateMemoryForProcess(buddySystem, pcb)) {
+        if (!allocateMemoryForProcess(buddySystem, pcb, loggerSRTN)) {
             iter = lGetNext(waitingList, iter);
             continue;
         }

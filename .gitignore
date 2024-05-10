@@ -4,6 +4,7 @@
 processes.txt
 scheduler.log
 scheduler.perf
+memory.log
 # Prerequisites
 *.d
 

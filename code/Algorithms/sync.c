@@ -3,6 +3,7 @@
 #include "../ProcessManagement/semaphore.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "../clk_utils.h"
 
 
 void schdInit(SchedulerInfo* info) {
@@ -27,13 +28,13 @@ int qRcvProc(lList* list, int msgQueueId, int semSyncRcv) {
     return 0;
 }
 
-bsBlock* allocateMemoryForProcess(bsBuddySystem* buddySystem, PCB* pcb) {
+bsBlock* allocateMemoryForProcess(bsBuddySystem* buddySystem, PCB* pcb, Logger* logger) {
     bsBlock* memoryBlock = bsAllocate(buddySystem, pcb->memsize);
     if (!memoryBlock) {
         printf("Can't allocate memory of %d bytes for process %d\n", pcb->memsize, pcb->id);
         return NULL;
     }
-    printf("Allocated memory of %d bytes for process %d\n", pcb->memsize, pcb->id);
+    loggerLogMemoryEvent(logger, getClk(), pcb->id, "allocated", pcb->memsize, memoryBlock->addressStart, memoryBlock->addressStart + memoryBlock->size - 1);
     pcb->memoryBlock = memoryBlock;
     return memoryBlock;
 }

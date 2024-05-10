@@ -1,7 +1,7 @@
 #include "logger.h"
 #include <math.h>
 
-Logger* loggerInit(const char* logPath, const char* perfPath) {
+Logger* loggerInit(const char* logPath, const char* perfPath, const char* memPath) {
     Logger* logger = malloc(sizeof(Logger));
     if (!logger) {
         perror("Failed to allocate logger");
@@ -10,6 +10,7 @@ Logger* loggerInit(const char* logPath, const char* perfPath) {
 
     logger->logFile = fopen(logPath, "w");
     logger->perfFile = fopen(perfPath, "w");
+    logger->memFile = fopen(memPath, "w");
     if (!logger->logFile || !logger->perfFile) {
         perror("Failed to open file");
         free(logger);
@@ -17,6 +18,7 @@ Logger* loggerInit(const char* logPath, const char* perfPath) {
     }
 
     fprintf(logger->logFile, "#At time x process y state arr w total z remain y wait k\n");
+    fprintf(logger->memFile, "#At time x allocated y bytes for process z from i to j\n");
     logger->totalRuntime = 0;
     logger->totalWaitingTime = 0;
     logger->cpuWaitingTime = 0;
@@ -72,10 +74,21 @@ void loggerWritePerformanceData(Logger* logger) {
     fprintf(logger->perfFile, "Std WTA = %.2f", sqrt(variance));
 }
 
+void loggerLogMemoryEvent(Logger* logger, int time, int pid, const char* state, int memsize, int addressStart, int addressEnd) {
+    if (strcmp(state, "allocated") == 0) {
+        fprintf(logger->memFile, "At time %d allocated %d bytes for process %d from %d to %d\n",
+                time, memsize, pid, addressStart, addressEnd);
+    } else {
+        fprintf(logger->memFile, "At time %d freed %d bytes from process %d from %d to %d\n",
+                time, memsize, pid, addressStart, addressEnd);
+    }
+}
+
 void loggerDestroy(Logger* logger) {
     if (logger) {
         fclose(logger->logFile);
         fclose(logger->perfFile);
+        fclose(logger->memFile);
         free(logger->WTAs);
         free(logger);
     }

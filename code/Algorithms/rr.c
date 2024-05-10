@@ -69,7 +69,6 @@ void initRR(int msgQueueId, int semSyncRcv, int semSyncTerminate, int quantum, L
     buddySystemRR = buddySystem;
     semSyncTerminateRR = semSyncTerminate;
     while (!infoRR->finishGenerate || !qIsEmpty(queueRR) || infoRR->currentlyRunning) {
-        printf("Running RR\n");
         PCB* currentProcess = infoRR->currentlyRunning;
         if (currentProcess) {
             currentProcess->remainingTime--;
@@ -121,7 +120,6 @@ void startNextRR(PCB* pcb) {
 
 void catchTerminatedRR(int signum) {
     if (!infoRR->currentlyRunning) return; // Must be error
-    printf("Deallocated memory of %d bytes for process %d at time %d\n", infoRR->currentlyRunning->memsize, infoRR->currentlyRunning->id, getClk());
     pmFinishProcess(infoRR->currentlyRunning, loggerRR, buddySystemRR);
     free(infoRR->currentlyRunning);
     infoRR->currentlyRunning = NULL;
@@ -134,7 +132,7 @@ void handleWaitingProcessesRR(lList* waitingList, qQueue* queue, bsBuddySystem* 
     while (iter != lEnd(waitingList)) {
         // printf("Handling waiting process %d at time %d memsize %d\n", iter->pcb->id, getClk(), iter->pcb->memsize);
         PCB* pcb = iter->pcb;
-        if (!allocateMemoryForProcess(buddySystem, pcb)) {
+        if (!allocateMemoryForProcess(buddySystem, pcb, loggerRR)) {
             iter = lGetNext(waitingList, iter);
             continue;
         }
