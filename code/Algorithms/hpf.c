@@ -56,7 +56,7 @@ void catchTerminatedHPF(int signum);
  * @param heap A pointer to the min-heap of processes.
  * @param buddySystem A pointer to the buddy system allocator.
  */
-void handleWaitingProcessesHPF(lList* waitingList, mhMinHeap* heap , bsBuddySystem* buddySystem);
+void handleWaitingProcessesHPF(mhMinHeap* waitingList, mhMinHeap* heap , bsBuddySystem* buddySystem);
 
 
 SchedulerInfo* infoHPF = NULL;
@@ -64,13 +64,13 @@ Logger* loggerHPF = NULL;
 mhMinHeap* minHeapHPF = NULL;
 int semSyncTerminateHPF;
 // Waiting list for processes that can't be added to the heap because of memory shortage
-lList* waitingListHPF = NULL;  
+mhMinHeap* waitingListHPF = NULL;  
 bsBuddySystem* buddySystemHPF = NULL;
 
 void initHPF(int msgQueueId, int semSyncRcv, int semSyncTerminate, Logger* logger, bsBuddySystem* buddySystem){
     int initialCapacity = 16;
     minHeapHPF = mhCreate(initialCapacity);
-    waitingListHPF = lCreate();
+    waitingListHPF = mhCreate(initialCapacity);
     signal(SIGUSR1, catchTerminatedHPF);
     loggerHPF = logger;
     buddySystemHPF = buddySystem;
@@ -78,6 +78,7 @@ void initHPF(int msgQueueId, int semSyncRcv, int semSyncTerminate, Logger* logge
     semSyncTerminateHPF = semSyncTerminate;
     schdInit(infoHPF);
     while (!infoHPF->finishGenerate || !mhIsEmpty(minHeapHPF) || infoHPF->currentlyRunning) {
+        printf("test 1\n");
         PCB* currentProcess = infoHPF->currentlyRunning;
         if (currentProcess) {
             currentProcess->remainingTime--;
@@ -91,7 +92,7 @@ void initHPF(int msgQueueId, int semSyncRcv, int semSyncTerminate, Logger* logge
     signal(SIGUSR1, SIG_DFL);
     mhFree(minHeapHPF);
     minHeapHPF = NULL;
-    lFree(waitingListHPF);
+    mhFree(waitingListHPF);
     waitingListHPF = NULL;
     free(infoHPF);
     infoHPF = NULL;
@@ -125,16 +126,13 @@ void catchTerminatedHPF(int signum) {
     handleWaitingProcessesHPF(waitingListHPF, minHeapHPF, buddySystemHPF);
 }
 
-void handleWaitingProcessesHPF(lList* waitingList, mhMinHeap* heap, bsBuddySystem* buddySystem) {
-    lListNode* iter = lBegin(waitingList);
-    while (iter != lEnd(waitingList)) {
-        // printf("Handling waiting process %d at time %d memsize %d\n", iter->pcb->id, getClk(), iter->pcb->memsize);
-        PCB* pcb = iter->pcb;
+void handleWaitingProcessesHPF(mhMinHeap* waitingList, mhMinHeap* heap, bsBuddySystem* buddySystem) {
+    while(!mhIsEmpty(waitingList)) {
+        PCB* pcb = mhGetTop(waitingList);
         if (!allocateMemoryForProcess(buddySystem, pcb, loggerHPF)) {
-            iter = lGetNext(waitingList, iter);
-            continue;
+            return;
         }
-        iter = lRemove(waitingList, iter);
+        pcb = mhExtractMin(waitingList);
         mhInsert(heap, pcb, pcb->priority);
     }
 }

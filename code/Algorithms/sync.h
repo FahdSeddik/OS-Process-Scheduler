@@ -2,6 +2,7 @@
 #define SYNC_PROCESSES_H
 
 #include "../Dependencies/list.h"
+#include "../Dependencies/minheap.h"
 #include "../Dependencies/bool.h"
 #include "../Logging/logger.h"
 
@@ -37,7 +38,7 @@ void schdInit(SchedulerInfo* info);
  *
  * @return Returns 0 on successful processing of all messages, or -1 if a termination message is received.
  */
-int qRcvProc(lList* list, int msgQueueId, int semSyncRcv);
+int qRcvProc(mhMinHeap* list, int msgQueueId, int semSyncRcv);
 
 /**
  * Allocates memory for a process and assigns the memory block to the process.

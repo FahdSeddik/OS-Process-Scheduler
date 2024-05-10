@@ -49,19 +49,19 @@ void startNextRR(PCB* pcb);
  * @param queue A pointer to the queue of processes.
  * @param buddySystem A pointer to the buddy system allocator.
  */
-void handleWaitingProcessesRR(lList* waitingList, qQueue* queue , bsBuddySystem* buddySystem);
+void handleWaitingProcessesRR(mhMinHeap* waitingList, qQueue* queue , bsBuddySystem* buddySystem);
 
 qQueue* queueRR = NULL;
 SchedulerInfo* infoRR = NULL;
 Logger* loggerRR = NULL;
 int semSyncTerminateRR;
 // Waiting list for processes that can't be added to the heap because of memory shortage
-lList* waitingListRR = NULL; 
+mhMinHeap* waitingListRR = NULL; 
 bsBuddySystem* buddySystemRR = NULL;
 
 void initRR(int msgQueueId, int semSyncRcv, int semSyncTerminate, int quantum, Logger* logger, bsBuddySystem* buddySystem) {
     queueRR = qCreate();
-    waitingListRR = lCreate();
+    waitingListRR = mhCreate(16);
     signal(SIGUSR1, catchTerminatedRR);
     infoRR = malloc(sizeof(SchedulerInfo));
     schdInit(infoRR);
@@ -82,7 +82,7 @@ void initRR(int msgQueueId, int semSyncRcv, int semSyncTerminate, int quantum, L
     signal(SIGUSR1, SIG_DFL);
     qFree(queueRR);
     queueRR = NULL;
-    lFree(waitingListRR);
+    mhFree(waitingListRR);
     waitingListRR = NULL;
     free(infoRR);
     infoRR = NULL;
@@ -126,19 +126,13 @@ void catchTerminatedRR(int signum) {
     handleWaitingProcessesRR(waitingListRR, queueRR, buddySystemRR);
 }
 
-void handleWaitingProcessesRR(lList* waitingList, qQueue* queue, bsBuddySystem* buddySystem) {
-    {
-    lListNode* iter = lBegin(waitingList);
-    while (iter != lEnd(waitingList)) {
-        // printf("Handling waiting process %d at time %d memsize %d\n", iter->pcb->id, getClk(), iter->pcb->memsize);
-        PCB* pcb = iter->pcb;
+void handleWaitingProcessesRR(mhMinHeap* waitingList, qQueue* queue, bsBuddySystem* buddySystem) {
+    while(!mhIsEmpty(waitingList)) {
+        PCB* pcb = mhGetTop(waitingList);
         if (!allocateMemoryForProcess(buddySystem, pcb, loggerRR)) {
-            iter = lGetNext(waitingList, iter);
-            continue;
+            return;
         }
-        iter = lRemove(waitingList, iter);
+        pcb = mhExtractMin(waitingList);
         qEnqueue(queue, pcb);
     }
-}
-
 }

@@ -43,20 +43,20 @@ void catchTerminatedSRTN(int signum);
  * @param heap A pointer to the min-heap of processes.
  * @param buddySystem A pointer to the buddy system allocator.
  */
-void handleWaitingProcessesSRTN(lList* waitingList, mhMinHeap* heap, bsBuddySystem* buddySystem);
+void handleWaitingProcessesSRTN(mhMinHeap* waitingList, mhMinHeap* heap, bsBuddySystem* buddySystem);
 
 SchedulerInfo* infoSRTN = NULL;
 Logger* loggerSRTN = NULL;
 mhMinHeap* minHeapSRTN = NULL;
 int semSyncTerminateSRTN;
 // Waiting list for processes that can't be added to the heap because of memory shortage
-lList* waitingListSRTN = NULL; 
+mhMinHeap* waitingListSRTN = NULL; 
 bsBuddySystem* buddySystemSRTN = NULL;
 
 void initSRTN(int msgQueueId, int semSyncRcv, int semSyncTerminate, Logger* logger, bsBuddySystem* buddySystem) {
     int initialCapacity = 16;
     minHeapSRTN = mhCreate(initialCapacity);
-    waitingListSRTN = lCreate();
+    waitingListSRTN = mhCreate(initialCapacity);
     signal(SIGUSR1, catchTerminatedSRTN);
     loggerSRTN = logger;
     buddySystemSRTN = buddySystem;
@@ -77,7 +77,7 @@ void initSRTN(int msgQueueId, int semSyncRcv, int semSyncTerminate, Logger* logg
     signal(SIGUSR1, SIG_DFL);
     mhFree(minHeapSRTN);
     minHeapSRTN = NULL;
-    lFree(waitingListSRTN);
+    mhFree(waitingListSRTN);
     waitingListSRTN = NULL;
     free(infoSRTN);
     infoSRTN = NULL;
@@ -124,16 +124,13 @@ void catchTerminatedSRTN(int signum) {
     handleWaitingProcessesSRTN(waitingListSRTN, minHeapSRTN, buddySystemSRTN);
 }
 
-void handleWaitingProcessesSRTN(lList* waitingList, mhMinHeap* heap, bsBuddySystem* buddySystem) {
-    lListNode* iter = lBegin(waitingList);
-    while (iter != lEnd(waitingList)) {
-        // printf("Handling waiting process %d at time %d memsize %d\n", iter->pcb->id, getClk(), iter->pcb->memsize);
-        PCB* pcb = iter->pcb;
+void handleWaitingProcessesSRTN(mhMinHeap* waitingList, mhMinHeap* heap, bsBuddySystem* buddySystem) {
+    while(!mhIsEmpty(waitingList)){
+        PCB* pcb = mhGetTop(waitingList);
         if (!allocateMemoryForProcess(buddySystem, pcb, loggerSRTN)) {
-            iter = lGetNext(waitingList, iter);
-            continue;
+            return;
         }
-        iter = lRemove(waitingList, iter);
+        pcb = mhExtractMin(waitingList);
         mhInsert(heap, pcb, pcb->remainingTime);
     }
 }

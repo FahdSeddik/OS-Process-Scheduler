@@ -13,7 +13,7 @@ void schdInit(SchedulerInfo* info) {
 }
 
 
-int qRcvProc(lList* list, int msgQueueId, int semSyncRcv) {
+int qRcvProc(mhMinHeap* list, int msgQueueId, int semSyncRcv) {
     semDown(semSyncRcv);
     ProcessMessage message;
     message.mtype = MESSAGE_MTYPE;
@@ -23,7 +23,7 @@ int qRcvProc(lList* list, int msgQueueId, int semSyncRcv) {
         if(message.id == -1) return -1;
         PCB* pcb = (PCB *)malloc(sizeof(PCB));
         pcbInit(pcb, message.id, message.priority, message.arrivalTime, message.runningTime, message.memsize, NULL);
-        lInsert(list, pcb);
+        mhInsert(list, pcb, pcb->memsize);
     }
     return 0;
 }
